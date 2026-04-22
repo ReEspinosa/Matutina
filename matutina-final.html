@@ -1,0 +1,1030 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Matutina 2026 — Concurso</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0D0A1A; --surface:#13102A; --card:#1C1836; --card2:#211D3D;
+  --gold:#C9A84C; --gl:#E8C97A; --gd:rgba(201,168,76,.12); --gb:rgba(201,168,76,.20);
+  --text:#EDE8D8; --muted:rgba(237,232,216,.5); --border:rgba(201,168,76,.18);
+  --green:#4DC882; --red:#E05858; --blue:#5B8FE8; --purple:#9575E0;
+  --r:13px;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:radial-gradient(ellipse 60% 45% at 20% 5%,rgba(201,168,76,.055) 0%,transparent 55%),
+             radial-gradient(ellipse 50% 50% at 80% 95%,rgba(91,143,232,.04) 0%,transparent 55%)}
+
+/* ── HEADER ── */
+header{text-align:center;padding:2rem 1rem 1.2rem;border-bottom:1px solid var(--border);position:relative;z-index:1}
+header .crown{font-size:1.4rem;margin-bottom:.2rem;opacity:.8}
+header h1{font-family:'Playfair Display',serif;font-size:clamp(1.5rem,4vw,2.2rem);font-weight:900;color:var(--gl);letter-spacing:.02em}
+header p{color:var(--muted);font-size:.82rem;margin-top:.25rem}
+.prog-wrap{margin:.9rem auto 0;max-width:380px;background:var(--card);border-radius:20px;height:5px;overflow:hidden}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--gold),var(--gl));border-radius:20px;transition:width .5s ease}
+.prog-lbl{font-size:.72rem;color:var(--muted);margin-top:.35rem}
+
+/* ── TABS ── */
+.tabs{display:flex;justify-content:center;gap:.4rem;padding:1rem 1rem .8rem;flex-wrap:wrap;position:relative;z-index:1}
+.tab{background:var(--card);border:1px solid var(--border);color:var(--muted);padding:.45rem 1.1rem;
+  border-radius:30px;cursor:pointer;font-size:.8rem;font-family:'DM Sans',sans-serif;
+  font-weight:500;transition:all .2s;letter-spacing:.01em}
+.tab:hover{border-color:var(--gold);color:var(--text)}
+.tab.active{background:linear-gradient(135deg,var(--gold),var(--gl));color:#0D0A18;border-color:transparent;font-weight:700}
+
+/* ── MONTH FILTER ── */
+.mf{display:flex;justify-content:center;gap:.4rem;padding:0 1rem .9rem;flex-wrap:wrap;position:relative;z-index:1}
+.mb{background:transparent;border:1px solid var(--border);color:var(--muted);padding:.3rem .9rem;
+  border-radius:20px;cursor:pointer;font-size:.78rem;font-family:'DM Sans',sans-serif;transition:all .2s}
+.mb:hover,.mb.active{border-color:var(--gold);color:var(--gl);background:var(--gd)}
+
+/* ── MAIN ── */
+main{max-width:680px;margin:0 auto;padding:0 1rem 5rem;position:relative;z-index:1}
+
+/* ── SECTION HEADER ── */
+.sec-hdr{font-family:'Playfair Display',serif;font-size:.75rem;color:var(--gold);letter-spacing:.12em;
+  text-transform:uppercase;margin-bottom:.9rem;display:flex;align-items:center;gap:.5rem}
+.sec-hdr::after{content:'';flex:1;height:1px;background:var(--border)}
+
+/* ══════════════ ESTUDIO ══════════════ */
+.verse-grid{display:flex;flex-direction:column;gap:.6rem}
+.vc{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:.9rem 1.1rem;
+  cursor:pointer;transition:all .2s;position:relative;overflow:hidden}
+.vc::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;
+  background:linear-gradient(180deg,var(--gold),transparent);opacity:0;transition:opacity .2s}
+.vc:hover{border-color:var(--gb);transform:translateX(2px)}
+.vc:hover::before,.vc.expanded::before{opacity:1}
+.vc.mem{border-color:rgba(77,200,130,.28)}.vc.mem::before{opacity:1;background:var(--green)}
+.vc-top{display:flex;align-items:flex-start;justify-content:space-between;gap:.8rem}
+.vc-date{font-size:.68rem;color:var(--gold);font-weight:500;letter-spacing:.05em}
+.vc-title{font-family:'Playfair Display',serif;font-size:.92rem;font-weight:700;margin:.18rem 0 0;flex:1}
+.vc-check{font-size:.85rem;flex-shrink:0}
+.vc-verse{font-size:.82rem;color:var(--muted);margin-top:.55rem;line-height:1.55;font-style:italic;display:none}
+.vc-ref{font-size:.72rem;color:var(--gold);margin-top:.3rem;display:none}
+.vc.expanded .vc-verse,.vc.expanded .vc-ref{display:block}
+.mark-btn{margin-top:.7rem;background:transparent;border:1px solid var(--border);color:var(--muted);
+  padding:.28rem .75rem;border-radius:20px;cursor:pointer;font-size:.72rem;font-family:'DM Sans',sans-serif;
+  display:none;transition:all .2s}
+.mark-btn:hover{border-color:var(--green);color:var(--green)}
+.vc.expanded .mark-btn{display:inline-block}
+
+/* ══════════════ PRÁCTICA ══════════════ */
+.prac-card{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:2rem 1.5rem;
+  text-align:center;position:relative;overflow:hidden;margin-bottom:1rem}
+.prac-card::after{content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse at top,rgba(201,168,76,.04),transparent);pointer-events:none}
+.prac-meta{font-size:.7rem;color:var(--gold);letter-spacing:.1em;text-transform:uppercase;margin-bottom:.4rem}
+.prac-label{font-size:.75rem;color:var(--muted);margin-bottom:.3rem}
+.prac-clue{font-family:'Playfair Display',serif;font-size:clamp(1.6rem,5vw,2.4rem);font-weight:900;
+  color:var(--gl);margin-bottom:.5rem;line-height:1.15}
+.prac-instr{font-size:.8rem;color:var(--muted);margin-bottom:1.5rem;line-height:1.5}
+.prac-instr strong{color:var(--text)}
+
+.rec-btn{width:76px;height:76px;border-radius:50%;border:none;cursor:pointer;display:flex;
+  align-items:center;justify-content:center;margin:0 auto 1rem;transition:all .2s;
+  font-size:1.6rem;background:linear-gradient(135deg,var(--gold),var(--gl));
+  box-shadow:0 0 28px rgba(201,168,76,.28)}
+.rec-btn:hover{transform:scale(1.05)}
+.rec-btn.rec{background:linear-gradient(135deg,var(--red),#ff7070);
+  box-shadow:0 0 28px rgba(224,88,88,.4);animation:pulse .9s infinite}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.07)}}
+.rec-status{font-size:.78rem;color:var(--muted);min-height:1.2em}
+.transcript{background:rgba(0,0,0,.28);border:1px solid var(--border);border-radius:10px;
+  padding:.8rem 1rem;margin:.9rem 0;font-style:italic;font-size:.85rem;text-align:left;
+  min-height:2.5em;color:var(--text);display:none;line-height:1.5}
+
+/* Result panels */
+.res-panel{border-radius:var(--r);padding:.9rem 1.1rem;margin:.8rem 0;text-align:left;display:none}
+.res-panel.show{display:block;animation:fadeup .25s ease}
+@keyframes fadeup{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.res-correct{background:rgba(77,200,130,.08);border:1px solid rgba(77,200,130,.25)}
+.res-partial{background:rgba(201,168,76,.08);border:1px solid rgba(201,168,76,.22)}
+.res-wrong{background:rgba(224,88,88,.08);border:1px solid rgba(224,88,88,.22)}
+.res-score{font-size:1.4rem;font-weight:700;margin-bottom:.25rem}
+.res-correct .res-score{color:var(--green)}.res-partial .res-score{color:var(--gl)}.res-wrong .res-score{color:var(--red)}
+.res-breakdown{margin-top:.6rem}
+.rb-row{display:flex;align-items:center;gap:.5rem;margin-bottom:.35rem;font-size:.8rem}
+.rb-icon{font-size:.9rem;width:1.1rem;flex-shrink:0}
+.rb-label{color:var(--muted);min-width:65px;font-size:.72rem;text-transform:uppercase;letter-spacing:.05em}
+.rb-bar-wrap{flex:1;height:5px;background:var(--card2);border-radius:3px;overflow:hidden}
+.rb-bar{height:100%;border-radius:3px;transition:width .5s ease}
+.rb-pct{font-size:.72rem;font-weight:600;min-width:30px;text-align:right}
+.correct-verse-box{background:var(--bg);border-radius:9px;padding:.65rem .85rem;margin-top:.7rem;
+  font-size:.8rem;line-height:1.6}
+.cv-row{margin-bottom:.25rem}
+.cv-lbl{font-size:.65rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-right:.4rem}
+.cv-val{color:var(--text)}
+.cv-val.gold{color:var(--gl);font-family:'Playfair Display',serif;font-style:italic}
+
+/* Reveal btn */
+.reveal-link{font-size:.76rem;color:var(--muted);cursor:pointer;text-decoration:underline;
+  display:inline-block;margin-top:.3rem;background:none;border:none;font-family:'DM Sans',sans-serif}
+.reveal-link:hover{color:var(--gl)}
+
+/* Controls */
+.ctrl-row{display:flex;gap:.6rem;justify-content:center;flex-wrap:wrap;margin-top:.8rem}
+.btn-p{background:linear-gradient(135deg,var(--gold),var(--gl));border:none;color:#0D0A18;
+  padding:.6rem 1.6rem;border-radius:30px;cursor:pointer;font-family:'DM Sans',sans-serif;
+  font-size:.85rem;font-weight:700;transition:all .2s}
+.btn-p:hover{opacity:.9;transform:translateY(-1px)}
+.btn-g{background:transparent;border:1px solid var(--border);color:var(--text);
+  padding:.6rem 1.2rem;border-radius:30px;cursor:pointer;font-family:'DM Sans',sans-serif;
+  font-size:.82rem;transition:all .2s}
+.btn-g:hover{border-color:var(--gold);color:var(--gl)}
+
+/* Stats pills */
+.stats-row{display:flex;gap:.6rem;justify-content:center;margin-bottom:1.2rem;flex-wrap:wrap}
+.stat-p{background:var(--card);border:1px solid var(--border);border-radius:20px;
+  padding:.3rem .85rem;font-size:.76rem}
+.stat-p b{color:var(--gl)}
+
+/* ══════════════ QUIZ ══════════════ */
+.q-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);
+  padding:1.3rem 1.2rem;margin-bottom:.9rem;animation:fadeup .28s ease}
+.q-badge{display:inline-flex;align-items:center;gap:.3rem;font-size:.67rem;letter-spacing:.08em;
+  text-transform:uppercase;font-weight:700;padding:.22rem .65rem;border-radius:20px;margin-bottom:.75rem}
+.qb-mc{background:rgba(91,143,232,.13);color:var(--blue);border:1px solid rgba(91,143,232,.22)}
+.qb-tf{background:rgba(149,117,224,.13);color:var(--purple);border:1px solid rgba(149,117,224,.22)}
+.qb-fb{background:rgba(201,168,76,.11);color:var(--gl);border:1px solid rgba(201,168,76,.2)}
+.qb-mc2{background:rgba(77,200,130,.1);color:var(--green);border:1px solid rgba(77,200,130,.2)}
+.clue-lbl{font-size:.67rem;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:.22rem}
+.clue-val{font-family:'Playfair Display',serif;font-size:.98rem;font-weight:700;color:var(--gl);
+  line-height:1.35;padding:.5rem .75rem;background:var(--gd);border-radius:7px;
+  border-left:3px solid var(--gold);margin-bottom:.8rem}
+.q-ask{font-size:.8rem;color:var(--muted);margin-bottom:.9rem}
+.q-ask strong{color:var(--text);font-weight:600}
+
+/* MC */
+.mc-opts{display:flex;flex-direction:column;gap:.5rem}
+.mc-opt{background:var(--card2);border:1.5px solid var(--border);border-radius:9px;
+  padding:.7rem .95rem;cursor:pointer;font-size:.83rem;line-height:1.45;transition:all .15s;text-align:left;
+  font-family:'DM Sans',sans-serif;color:var(--text)}
+.mc-opt:hover{border-color:var(--gold);background:rgba(201,168,76,.07)}
+.mc-opt.ok{border-color:var(--green);background:rgba(77,200,130,.09);color:var(--green)}
+.mc-opt.fail{border-color:var(--red);background:rgba(224,88,88,.09);color:var(--red);opacity:.65}
+
+/* TF */
+.tf-row{display:grid;grid-template-columns:1fr 1fr;gap:.7rem;margin-top:.4rem}
+.tf-btn{padding:1rem;border-radius:11px;border:1.5px solid var(--border);background:var(--card2);
+  cursor:pointer;font-family:'Playfair Display',serif;font-size:.95rem;font-weight:700;
+  transition:all .15s;color:var(--text);display:flex;flex-direction:column;align-items:center;gap:.3rem}
+.tf-btn .ico{font-size:1.5rem}
+.tf-t:hover{border-color:var(--green);color:var(--green)}
+.tf-f:hover{border-color:var(--red);color:var(--red)}
+.tf-btn.ok{border-color:var(--green);color:var(--green);background:rgba(77,200,130,.09)}
+.tf-btn.fail{border-color:var(--red);color:var(--red);background:rgba(224,88,88,.09)}
+
+/* FB */
+.fb-txt{font-size:.85rem;line-height:2;background:var(--card2);border-radius:9px;
+  padding:.75rem .95rem;margin-bottom:.8rem;border:1px solid var(--border)}
+.blank{display:inline-block;min-width:66px;border-bottom:2px solid var(--gold);
+  padding:0 3px;cursor:pointer;color:var(--gl);font-weight:600;transition:all .15s;
+  border-radius:2px;text-align:center;font-size:.83rem}
+.blank.sel{background:rgba(201,168,76,.17);border-bottom-color:var(--gl)}
+.blank.filled{color:var(--gl);border-bottom-color:var(--gl)}
+.blank.ok{color:var(--green);border-bottom-color:var(--green)}
+.blank.fail{color:var(--red);border-bottom-color:var(--red)}
+.wbank{display:flex;flex-wrap:wrap;gap:.4rem;padding:.6rem;background:var(--bg);
+  border-radius:9px;border:1px solid var(--border);margin-bottom:.7rem}
+.bw{background:var(--card2);border:1.5px solid var(--border);border-radius:7px;
+  padding:.3rem .7rem;cursor:pointer;font-size:.8rem;transition:all .15s;color:var(--text);
+  font-family:'DM Sans',sans-serif}
+.bw:hover{border-color:var(--gold);color:var(--gl)}
+.bw.used{opacity:.28;pointer-events:none}
+
+/* Match */
+.match-grid{display:grid;grid-template-columns:1fr 1fr;gap:.5rem;margin-bottom:.7rem}
+.m-col-lbl{font-size:.64rem;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);
+  margin-bottom:.35rem;text-align:center}
+.m-items{display:flex;flex-direction:column;gap:.38rem}
+.mi{background:var(--card2);border:1.5px solid var(--border);border-radius:8px;
+  padding:.48rem .65rem;font-size:.76rem;cursor:pointer;transition:all .15s;
+  line-height:1.35;text-align:center;color:var(--text);font-family:'DM Sans',sans-serif}
+.mi:hover{border-color:var(--gold)}
+.mi.active{border-color:var(--gl);background:rgba(201,168,76,.15)}
+.mi.p0{border-color:var(--blue);background:rgba(91,143,232,.1);color:var(--blue)}
+.mi.p1{border-color:var(--purple);background:rgba(149,117,224,.1);color:var(--purple)}
+.mi.p2{border-color:var(--green);background:rgba(77,200,130,.1);color:var(--green)}
+.mi.p3{border-color:#E8975B;background:rgba(232,151,91,.1);color:#E8975B}
+.mi.mc-ok{border-color:var(--green)!important;background:rgba(77,200,130,.12)!important}
+.mi.mc-fail{border-color:var(--red)!important;opacity:.5}
+
+/* Quiz result */
+.q-res{border-radius:var(--r);padding:.85rem 1.05rem;margin-bottom:.8rem;display:none;animation:fadeup .25s ease}
+.q-res.show{display:block}
+.q-res.ok{background:rgba(77,200,130,.07);border:1px solid rgba(77,200,130,.22)}
+.q-res.fail{background:rgba(224,88,88,.07);border:1px solid rgba(224,88,88,.2)}
+.q-res-hdr{font-weight:700;font-size:.9rem;margin-bottom:.5rem}
+.q-res.ok .q-res-hdr{color:var(--green)}.q-res.fail .q-res-hdr{color:var(--red)}
+
+/* ══════════════ CONCURSO ══════════════ */
+.con-stage{background:var(--card);border:1px solid var(--border);border-radius:20px;
+  padding:2.5rem 1.5rem;text-align:center;min-height:260px;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;margin-bottom:1rem;position:relative;overflow:hidden}
+.con-stage::after{content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse at top,rgba(201,168,76,.04),transparent);pointer-events:none}
+.con-ready{font-family:'Playfair Display',serif;font-size:.95rem;color:var(--muted);margin-bottom:1.5rem}
+.buzz-btn{width:130px;height:130px;border-radius:50%;border:3px solid var(--gold);
+  background:radial-gradient(circle,rgba(201,168,76,.12),transparent);cursor:pointer;
+  font-family:'Playfair Display',serif;font-size:.95rem;font-weight:700;color:var(--gl);
+  transition:all .15s;letter-spacing:.05em}
+.buzz-btn:hover{background:radial-gradient(circle,rgba(201,168,76,.25),transparent);
+  box-shadow:0 0 35px rgba(201,168,76,.25);transform:scale(1.03)}
+.buzz-btn:active{transform:scale(.96)}
+.con-clue-type{font-size:.68rem;text-transform:uppercase;letter-spacing:.1em;color:var(--gold);margin-bottom:.3rem}
+.con-clue-val{font-family:'Playfair Display',serif;font-size:clamp(1.4rem,4.5vw,2.2rem);
+  font-weight:900;color:var(--text);line-height:1.2;max-width:100%;margin-bottom:1.2rem;
+  animation:revl .35s ease-out}
+@keyframes revl{from{opacity:0;transform:scale(.92) translateY(8px)}to{opacity:1;transform:scale(1) translateY(0)}}
+.timer-bar{height:4px;background:var(--card2);border-radius:2px;width:100%;overflow:hidden;margin-bottom:1.5rem}
+.timer-fill{height:100%;border-radius:2px;transition:width .1s linear}
+
+/* ── Shared hidden ── */
+.hidden{display:none!important}
+
+/* Scrollbar */
+::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="crown">✦</div>
+  <h1>Matutina 2026</h1>
+  <p>Conquistadores &amp; Guías Mayores · Feb – Abr</p>
+  <div class="prog-wrap"><div class="prog-fill" id="progFill" style="width:0%"></div></div>
+  <div class="prog-lbl" id="progLbl">0 / 89 memorizados</div>
+</header>
+
+<div class="tabs">
+  <button class="tab active" onclick="setMode('estudio',this)">Estudio</button>
+  <button class="tab" onclick="setMode('practica',this)">Práctica</button>
+  <button class="tab" onclick="setMode('quiz',this)">Quiz</button>
+  <button class="tab" onclick="setMode('concurso',this)">Concurso</button>
+</div>
+
+<!-- ── ESTUDIO ── -->
+<div id="m-estudio">
+  <div class="mf">
+    <button class="mb active" onclick="eMF('all',this)">Todos</button>
+    <button class="mb" onclick="eMF('FEBRERO',this)">Febrero</button>
+    <button class="mb" onclick="eMF('MARZO',this)">Marzo</button>
+    <button class="mb" onclick="eMF('ABRIL',this)">Abril</button>
+  </div>
+  <main><div class="sec-hdr" id="eHdr">Todos los versículos</div><div id="eGrid"></div></main>
+</div>
+
+<!-- ── PRÁCTICA ── -->
+<div id="m-practica" class="hidden">
+  <div class="mf">
+    <button class="mb active" onclick="pMF('all',this)">Todos</button>
+    <button class="mb" onclick="pMF('FEBRERO',this)">Febrero</button>
+    <button class="mb" onclick="pMF('MARZO',this)">Marzo</button>
+    <button class="mb" onclick="pMF('ABRIL',this)">Abril</button>
+  </div>
+  <main>
+    <div id="noVoiceBanner" class="res-panel res-wrong hidden" style="display:none;margin-bottom:.8rem">
+      Tu navegador no soporta reconocimiento de voz. Usa Chrome o Edge en Android/PC.
+    </div>
+    <div class="stats-row">
+      <div class="stat-p">Practicados: <b id="pStat">0</b></div>
+      <div class="stat-p">Correctos: <b id="pCorr">0</b></div>
+      <div class="stat-p">Promedio: <b id="pAvg">—</b></div>
+    </div>
+    <div class="prac-card" id="pracCard">
+      <div class="prac-meta" id="pMeta">Versículo 1 de 89</div>
+      <div class="prac-label">Fecha</div>
+      <div class="prac-clue" id="pClue">—</div>
+      <div class="prac-instr">Di el <strong>título</strong>, el <strong>versículo</strong> y la <strong>cita bíblica</strong></div>
+      <button class="rec-btn" id="recBtn" onclick="toggleRec()">🎤</button>
+      <div class="rec-status" id="recStat">Toca para grabar</div>
+      <div class="transcript" id="pTrans"></div>
+      <div class="res-panel" id="pResult"></div>
+      <button class="reveal-link" onclick="revealP()">Ver versículo completo</button>
+    </div>
+    <div class="ctrl-row">
+      <button class="btn-g" onclick="prevP()">← Anterior</button>
+      <button class="btn-g" onclick="shuffleP()">Aleatorio</button>
+      <button class="btn-p" onclick="nextP()">Siguiente →</button>
+    </div>
+  </main>
+</div>
+
+<!-- ── QUIZ ── -->
+<div id="m-quiz" class="hidden">
+  <div class="mf">
+    <button class="mb active" onclick="qMF('all',this)">Todos</button>
+    <button class="mb" onclick="qMF('FEBRERO',this)">Febrero</button>
+    <button class="mb" onclick="qMF('MARZO',this)">Marzo</button>
+    <button class="mb" onclick="qMF('ABRIL',this)">Abril</button>
+  </div>
+  <main>
+    <div class="stats-row">
+      <div class="stat-p">Correctas: <b id="qCorr">0</b>/<b id="qTot">0</b></div>
+      <div class="stat-p">Racha: <b id="qStrk">0</b></div>
+    </div>
+    <div id="qArea"></div>
+  </main>
+</div>
+
+<!-- ── CONCURSO ── -->
+<div id="m-concurso" class="hidden">
+  <div class="mf">
+    <button class="mb active" onclick="cMF('all',this)">Todos</button>
+    <button class="mb" onclick="cMF('FEBRERO',this)">Febrero</button>
+    <button class="mb" onclick="cMF('MARZO',this)">Marzo</button>
+    <button class="mb" onclick="cMF('ABRIL',this)">Abril</button>
+  </div>
+  <main>
+    <div class="stats-row">
+      <div class="stat-p">Ronda: <b id="cRnd">1</b></div>
+      <div class="stat-p">Correctas: <b id="cCrr">0</b></div>
+      <div class="stat-p">Racha: <b id="cStrk">0</b></div>
+    </div>
+    <div id="cStage"></div>
+  </main>
+</div>
+
+<script>
+// ═══════════════════ DATA ═══════════════════
+const V=[
+  {m:'FEBRERO',d:'01/02',t:'EL ARTE EN LA GUERRA',v:'Cuando empezaron a entonar cantos de alabanza, el Señor puso emboscadas contra los de Amón, los de Moab y los del monte Seir, que venían contra Judá, y se mataron unos a otros',r:'2 Cr. 20:22'},
+  {m:'FEBRERO',d:'02/02',t:'PIES DE EVANGELISTA',v:'¡Cuán hermosos son los pies de los que anuncian las buenas noticias!',r:'Rom. 10:15'},
+  {m:'FEBRERO',d:'03/02',t:'EL HÉROE TORPE',v:'Pero Jonás se levantó para huir a Tarsis de la presencia del Señor',r:'Jonás 1:3'},
+  {m:'FEBRERO',d:'04/02',t:'ÉL HACE QUE EL TIEMPO SE DETENGA',v:'Pero, amados, no ignoren esto: Para el Señor, un día es como mil años; y mil años, como un día',r:'2 Pd 3:8'},
+  {m:'FEBRERO',d:'05/02',t:'LA DESVENTAJA DE LA TECNOLOGÍA',v:'No se conformen a este mundo, sino transfórmense mediante la renovación de su entendimiento',r:'Rom 12:2'},
+  {m:'FEBRERO',d:'06/02',t:'UN SOLO PEDIDO',v:'Una sola cosa he demandado al Señor, esta buscaré: que esté yo en la casa del Señor todos los días de mi vida, para contemplar la hermosura del Señor e inquirir en su templo',r:'Sal. 27:4'},
+  {m:'FEBRERO',d:'07/02',t:'MICRORREVOLUCIÓN',v:'No nos cansemos de hacer el bien, porque a su debido tiempo cosecharemos si no nos damos por vencidos',r:'Gal. 6:9 NVI'},
+  {m:'FEBRERO',d:'08/02',t:'EL HOMBRE PASTEL',v:'Si quiero que él permanezca hasta que yo vuelva, ¿qué te importa a ti?',r:'Jn. 21:23 DHH'},
+  {m:'FEBRERO',d:'09/02',t:'EL LUGAR DEL SILENCIO',v:'Muy temprano de mañana, aún oscuro, Jesús se levantó, fue a un lugar solitario y se puso a orar',r:'Mr. 1:35'},
+  {m:'FEBRERO',d:'10/02',t:'EL AMIGO DE LOS PECADORES',v:'Los fariseos y los escribas murmuraban: Este hombre recibe a los pecadores y come con ellos',r:'Lc. 15:2'},
+  {m:'FEBRERO',d:'11/02',t:'HABLAR CON DIOS',v:'Oren sin cesar',r:'1 Tes. 5:17'},
+  {m:'FEBRERO',d:'12/02',t:'EL HOMBRE DEL SOMBRERO',v:'Caminó, pues, Enoc con Dios, y desapareció, porque Dios se lo llevó',r:'Gn. 5:24'},
+  {m:'FEBRERO',d:'13/02',t:'AMOR ABSURDO',v:'Un hombre tenía dos hijos',r:'Lc. 15:11'},
+  {m:'FEBRERO',d:'14/02',t:'EL BUEN CHISME',v:'No andarás chismeando entre tu pueblo. No demandes contra la vida de tu prójimo. Yo soy el Señor',r:'Lv. 19:16'},
+  {m:'FEBRERO',d:'15/02',t:'EL PODER DE LA MÚSICA',v:'Mientras el músico tañía el arpa, la mano del Señor vino sobre Eliseo',r:'2 Rey. 3:15 NVI'},
+  {m:'FEBRERO',d:'16/02',t:'EN LA FRONTERA DE LA FE',v:'Así, fijamos nuestros ojos no en lo que se ve, sino en lo que no se ve. Porque lo que se ve es temporal, pero lo que no se ve es eterno',r:'2 Cor 4:18'},
+  {m:'FEBRERO',d:'17/02',t:'EL PELIGRO DEL ÉXITO',v:'¡Ay de los que se consideran sabios, de los que se creen inteligentes!',r:'Isa 5:21 NVI'},
+  {m:'FEBRERO',d:'18/02',t:'EL BRILLO DE LA MUERTE',v:'Lo que entra en la boca no contamina al hombre. Lo que sale de la boca, eso contamina al hombre',r:'Mt 15:11'},
+  {m:'FEBRERO',d:'19/02',t:'MADUREZ',v:'Cuando yo era niño hablaba como niño, pensaba como niño, razonaba como niño. Pero cuando llegué a ser hombre, dejé lo que era de niño',r:'1 Cor 13:11'},
+  {m:'FEBRERO',d:'20/02',t:'UNA DIVISIÓN BUENA',v:'Si decimos que estamos en comunión con él y andamos en tinieblas, y no practicamos la verdad',r:'1 Jn 1:6'},
+  {m:'FEBRERO',d:'21/02',t:'SENTIDO DE HUMOR',v:'¡Regocíjense en el Señor siempre! Repito: ¡Regocíjense!',r:'Fil 4:4'},
+  {m:'FEBRERO',d:'22/02',t:'GRACIA INCLUSIVA',v:'Tómala y vete. Quiero darle al último obrero contratado lo mismo que te di a ti',r:'Mt 20:14 NVI'},
+  {m:'FEBRERO',d:'23/02',t:'LEÓN',v:'Sean sobrios y velen; porque su adversario el diablo, cual león rugiente, anda alrededor buscando a quien devorar',r:'1 Pd 5:8'},
+  {m:'FEBRERO',d:'24/02',t:'OCÚPATE DE LAS PEQUEÑAS COSAS',v:'Cácennos las zorras, las zorras pequeñas, que destruyen las viñas; porque nuestras viñas están en flor',r:'Cant 2:15'},
+  {m:'FEBRERO',d:'25/02',t:'FÁBRICA DE ÍDOLOS',v:'Hijo de Adán, estos hombres han puesto ídolos en su corazón y malvados tropiezos ante sí. ¿Acaso dejaré que me consulten?',r:'Eze 14:3'},
+  {m:'FEBRERO',d:'26/02',t:'JÓVENES DE TRAPO',v:'Les estoy escribiendo, jóvenes, porque son fuertes, la palabra de Dios mora en ustedes y han vencido al maligno',r:'1 Jn 2:14'},
+  {m:'FEBRERO',d:'27/02',t:'AMOR (I)LIMITADO',v:'Y pido que puedan comprender cuán ancho y largo, alto y profundo es el amor de Cristo, que sobrepasa nuestro conocimiento',r:'Ef 3:17-19 NVI'},
+  {m:'FEBRERO',d:'28/02',t:'OLOR DE MUERTE',v:'Porque para Dios somos buen aroma de Cristo',r:'2 Cor 2:15'},
+  {m:'MARZO',d:'01/03',t:'LA MUJER INVISIBLE',v:'No había brillo en los ojos de Lea',r:'Gn 29:17 NVI'},
+  {m:'MARZO',d:'02/03',t:'JESÚS Y LOS DISCRIMINADOS',v:'Vino una mujer samaritana a sacar agua, y Jesús le dijo: Dame de beber',r:'Jn 4:7'},
+  {m:'MARZO',d:'03/03',t:'EL PODER DE LOS SIRVIENTES',v:'Antes lo necio del mundo eligió Dios, para avergonzar a los sabios; lo débil del mundo eligió Dios, para avergonzar a la fuerte',r:'1 Cor 1:27'},
+  {m:'MARZO',d:'04/03',t:'EL PEQUEÑO GRAN HOMBRE',v:'Saulo, Saulo, ¿por qué me persigues?',r:'Hch 22:7'},
+  {m:'MARZO',d:'05/03',t:'PLANETA UTI',v:'El castigo que nos trae paz lo cargó él, y por su llaga fuimos sanados',r:'Isa 53:5'},
+  {m:'MARZO',d:'06/03',t:'GRACIA, ASÍ DE SIMPLE',v:'Por gracia han sido salvados por la fe. Y esto no proviene de ustedes, sino que es don de Dios. No por obras, para que nadie se gloríe',r:'Ef 2:8,9'},
+  {m:'MARZO',d:'07/03',t:'LA SELFIE DE DIOS',v:'La ley es santa, y el mandamiento, santo, justo y bueno',r:'Rom. 7:12'},
+  {m:'MARZO',d:'08/03',t:'MUJER EJEMPLAR',v:'Mujer virtuosa, ¿quién la hallará? su valor excede mucho a las piedras preciosas',r:'Prov 31:10'},
+  {m:'MARZO',d:'09/03',t:'EL VALOR DE UNA UÑA',v:'Porque somos miembros de su cuerpo',r:'Ef 5:30'},
+  {m:'MARZO',d:'10/03',t:'RUMBO A UNA COLISIÓN',v:'Pongan la mira en las cosas de arriba, no en las de la tierra',r:'Col 3:2'},
+  {m:'MARZO',d:'11/03',t:'NACIDO PARA LUCHAR',v:'Jacob respondió: No te dejaré, si no me bendices',r:'Gn 32:26'},
+  {m:'MARZO',d:'12/03',t:'CUERDAS',v:'Al malvado lo atrapan sus malas obras; las cuerdas de su pecado lo aprisionan',r:'Prov 5:22 NVI'},
+  {m:'MARZO',d:'13/03',t:'CAJITA DE PROMESAS',v:'Reconozcan con todo el corazón y con toda el alma que no faltó ni una palabra de las buenas promesas que el Señor su Dios había dicho. Todas se han cumplido, sin faltar ni una de ellas',r:'Jos. 23:14'},
+  {m:'MARZO',d:'14/03',t:'AVES Y ZORRAS',v:'Jesús le respondió: Las zorras tienen cuevas; y las ave del cielo, nidos; pero el Hijo del hombre no tiene dónde reclinar la cabeza',r:'Lc 9:58'},
+  {m:'MARZO',d:'15/03',t:'LAS DOS CARAS DE LA MONEDA',v:'Bueno es el Señor; es refugio en el día de la angustia y conoce a los que en él confían',r:'Nah 1:7 NVI'},
+  {m:'MARZO',d:'16/03',t:'LOS EMOJIS NO ORAN',v:'Dios es Espíritu; y los que lo adoran deben adorarlo en espíritu y en verdad',r:'Jn 4:24'},
+  {m:'MARZO',d:'17/03',t:'LA ORQUESTA DE SATANÁS',v:'Tan pronto como escuchen el sonido de trompetas, flautas, cítaras, liras, zampoñas y todo tipo de música, deberán inclinarse y adorar la estatua de oro que el rey Nabucodonosor ha mandado erigir',r:'Dn 3:5 NVI'},
+  {m:'MARZO',d:'18/03',t:'EL DIOS DINERO',v:'Ustedes no pueden servir a Dios y a las riquezas',r:'Lc 16:13'},
+  {m:'MARZO',d:'19/03',t:'¿QUIÉN ES JESÚS?',v:'Y ustedes, ¿quién dicen que soy?',r:'Mt 16:15'},
+  {m:'MARZO',d:'20/03',t:'EN EL FONDO DEL POZO',v:'Señor, de lo profundo clamo a ti. Señor, escucha mi voz, estén atentos tus oídos a la voz de mi súplica',r:'Sal 130:1,2'},
+  {m:'MARZO',d:'21/03',t:'CREYENTE OSTENTACIÓN',v:'Porque todo lo que hay en el mundo, los deseos de la carne, la codicia de los ojos y la soberbia de la vida, no procede del Padre, sino del mundo',r:'1 Jn 2:16'},
+  {m:'MARZO',d:'22/03',t:'NO LO DEJES PARA DESPUÉS',v:'No te jactes del día de mañana, porque no sabes lo que el día traerá',r:'Prov 27:1 NVI'},
+  {m:'MARZO',d:'23/03',t:'ALUMNO "10"',v:'El corazón prudente adquiere conocimiento; los oídos de los sabios procuran hallarlo',r:'Prov 18:15 NVI'},
+  {m:'MARZO',d:'24/03',t:'MÁQUINA DEL TIEMPO',v:'Estas cosas les sucedieron por ejemplo, y fueron escritas para advertirnos a nosotros, a los que han llegado al fin del tiempo',r:'1 Cor 10:11'},
+  {m:'MARZO',d:'25/03',t:'EFECTO DOMINÓ',v:'En el principio Dios creó los cielos y la tierra',r:'Gn 1:1'},
+  {m:'MARZO',d:'26/03',t:'LA FUERZA DE LA DEBILIDAD',v:'Sacaron fuerza de la debilidad',r:'Hb 11:34'},
+  {m:'MARZO',d:'27/03',t:'ROSTRO DE ÁNGEL',v:'Entonces todos los que estaban sentados en el concilio, al mirar a Esteban, vieron su rostro como el rostro de un ángel',r:'Hch 6:15'},
+  {m:'MARZO',d:'28/03',t:'CRISIS DE IDENTIDAD',v:'Porque eres tibio, ni frío ni caliente, estoy por vomitarte de mi boca',r:'Ap 3:16'},
+  {m:'MARZO',d:'29/03',t:'¿ZIG O ZAG?',v:'Había confusión en la asamblea. Cada uno gritaba una cosa distinta, y la mayoría ni siquiera sabía para qué se habían reunido',r:'Hch 19:32 NVI'},
+  {m:'MARZO',d:'30/03',t:'DESAVENENCIAS',v:'Y hubo tal desacuerdo entre ellos que se separaron el uno del otro. Bernabé llevó a Marcos y navegó a Chipre',r:'Hch 15:39'},
+  {m:'MARZO',d:'31/03',t:'DAR HASTA QUE DUELA',v:'¡Baja de la cruz y sálvate a ti mismo!',r:'Mrc 15:20 NVI'},
+  {m:'ABRIL',d:'01/04',t:'SABIDURÍA ANIMAL',v:'El buey conoce a su dueño, y el asno el pesebre de su señor; pero Israel no conoce, mi pueblo no tiene discernimiento',r:'Isa 1:3'},
+  {m:'ABRIL',d:'02/04',t:'ÚLTIMAS HORAS',v:'Nadie tiene amor más grande que el que da la vida por sus amigos',r:'Jn 15:13 NVI'},
+  {m:'ABRIL',d:'03/04',t:'TODO PASA',v:'Cuando el rey David era anciano, de avanzada edad, lo cubrían de ropa pero no entraba en calor',r:'1 Rey 1:1'},
+  {m:'ABRIL',d:'04/04',t:'DESGRACIA AJENA NO ES CONSUELO',v:'Tú no debías haber estado mirando en el día de tu hermano, el día de su infortunio. No debías haberte alegrado de los hijos de Judá en el día de su ruina, ni haberte jactado en el día de su angustia',r:'Abd 12'},
+  {m:'ABRIL',d:'05/04',t:'EL ABRAZO DE DIOS',v:'En ese tiempo yo los traeré a ustedes, en ese tiempo los reuniré yo; y los pondré por renombre y alabanza entre todos los pueblos de la tierra, cuando restaure sus cautivos ante sus propios ojos, dice el Señor',r:'Sof 3:20'},
+  {m:'ABRIL',d:'06/04',t:'PANDEMIA',v:'Amado, deseo que prosperes en todo, y que tengas salud, así como prosperas espiritualmente',r:'3 Jn 2'},
+  {m:'ABRIL',d:'07/04',t:'JARDINES',v:'Por uno solo que desobedeció a Dios, muchos pasaron a ser pecadores; pero por uno solo que obedeció a Dios, muchos serán declarados justos',r:'Rom 5:19 NTV'},
+  {m:'ABRIL',d:'08/04',t:'SAUDADE',v:'Aunque tengo mucho que escribirles, no quiero usar papel y tinta; sino que espero ir a visitarlos y hablar cara a cara, para que nuestro gozo sea completo',r:'2 Jn 12'},
+  {m:'ABRIL',d:'09/04',t:'¿CONGELADOS O RESUCITADOS?',v:'Jesús respondió: Yo soy la resurrección y la vida. El que cree en mí, aunque muera, vivirá',r:'Jn 11:25'},
+  {m:'ABRIL',d:'10/04',t:'EL DUEÑO DEL MUNDO',v:'Mía es la plata y mío es el oro, afirma el Señor de los Ejércitos',r:'Hag 2:8 NVI'},
+  {m:'ABRIL',d:'11/04',t:'EL SÉPTIMO CONTINENTE',v:'La tierra se contaminó bajo sus habitantes, porque traspasaron leyes, falsearon el derecho, quebrantaron el pacto eterno',r:'Isa 24:5'},
+  {m:'ABRIL',d:'12/04',t:'LAS VENTAJAS DE LOS INTROVERTIDOS',v:'¡Sé fuerte y valiente! ¡No tengas miedo ni te desanimes! Porque el Señor tu Dios te acompañará dondequiera que vayas',r:'Jos 1:9'},
+  {m:'ABRIL',d:'13/04',t:'CAMINO INVERTIDO',v:'Y él empezó a enseñarles',r:'Mt 5:2'},
+  {m:'ABRIL',d:'14/04',t:'LA BUENA POBREZA',v:'Bienaventurados los pobres en espíritu, porque de ellos es el reino de los cielos',r:'Mt 5:3'},
+  {m:'ABRIL',d:'15/04',t:'FELICES LOS QUE LLORAN',v:'Bienaventurados los que lloran, porque ellos serán consolados',r:'Mt 5:4'},
+  {m:'ABRIL',d:'16/04',t:'LA VICTORIA LES PERTENECE A LOS MANSOS',v:'Bienaventurados los mansos, porque ellos heredarán la tierra',r:'Mt 5:5'},
+  {m:'ABRIL',d:'17/04',t:'SATISFECHOS',v:'Bienaventurados los que tienen hambre y sed de justicia, porque ellos serán saciados',r:'Mt 5:6'},
+  {m:'ABRIL',d:'18/04',t:'SORPRENDIDOS POR LA BONDAD',v:'Bienaventurados los misericordiosos, porque ellos alcanzarán misericordia',r:'Mt 5:7'},
+  {m:'ABRIL',d:'19/04',t:'CORAZÓN DE NIÑO',v:'Bienaventurados los de limpio corazón, porque ellos verán a Dios',r:'Mt 5:8'},
+  {m:'ABRIL',d:'20/04',t:'AMIGO DE LA PAZ',v:'Bienaventurados los pacificadores, porque ellos serán llamados hijos de Dios',r:'Mt 5:9'},
+  {m:'ABRIL',d:'21/04',t:'EL GRAND FINALE DE LA FE',v:'Bienaventurados los que padecen persecución por causa de la justicia, porque de ellos es el reino de los cielos',r:'Mt 5:10'},
+  {m:'ABRIL',d:'22/04',t:'COMIENZO HUMILDE',v:'Pero tú, Belén Efrata, pequeña entre los clanes de Judá, de ti saldrá el que gobernará a Israel',r:'Miq 5:2 NVI'},
+  {m:'ABRIL',d:'23/04',t:'PIEDRAS QUE LLORAN',v:'Y no solo esto, sino que nos alegramos aun en las tribulaciones, al saber que la tribulación produce paciencia; y la paciencia produce un carácter probado; y el carácter alienta esperanza',r:'Rom 5:3,4'},
+  {m:'ABRIL',d:'24/04',t:'PREGUNTAS Y RESPUESTAS',v:'¿Es correcto que paguemos impuestos al César o no?',r:'Mt 22:17 NTV'},
+  {m:'ABRIL',d:'25/04',t:'JESÚS ADMIRADO',v:'Cuando Jesús lo oyó, quedó admirado, y dijo a los que lo seguían: Les aseguro que ni en Israel he hallado tanta fe',r:'Mt 8:10'},
+  {m:'ABRIL',d:'26/04',t:'EL MILAGRO DE LA GRACIA',v:'Borra mis transgresiones. Lávame más y más de mi maldad, y límpiame de mi pecado',r:'Sal 51:1,2'},
+  {m:'ABRIL',d:'27/04',t:'EL HOMBRE QUE NO SABÍA MENTIR',v:'Micaías respondió: Vive el Señor que lo que él me hable, eso diré',r:'1 Rey 22:14'},
+  {m:'ABRIL',d:'28/04',t:'ALEGRÍA EN EL TEMOR',v:'¡Qué felices son los que temen al Señor!',r:'Sal 112:1 NTV'},
+  {m:'ABRIL',d:'29/04',t:'TOCADO POR UN SI BEMOL',v:'Me alegraré y regocijaré en ti, cantaré a tu nombre, Altísimo',r:'Sal 9:2'},
+  {m:'ABRIL',d:'30/04',t:'EL SECRETO DE LA FELICIDAD',v:'Es más dichoso dar que recibir',r:'Hch 20:35'},
+];
+
+// ═════════════════ STATE ═════════════════
+let mode='estudio';
+let memorized=JSON.parse(localStorage.getItem('mem')||'[]');
+let eFilter='all', pFilter='all', qFilter='all', cFilter='all';
+let pPool=[], pIdx=0;
+let qPool=[], curQ=null, qAnswered=false, qStats={c:0,t:0,s:0};
+let cPool=[], cStats={rnd:1,c:0,s:0}, cState='ready', cVerse=null, cClueField=null;
+let pStats={t:0,c:0,scores:[]};
+let isRec=false, recog=null, hasVoice=false;
+let timerInt=null, timerSec=0, timerMax=30;
+
+// ═════════════════ UTILS ═════════════════
+function pool(f){ return f==='all'?V:V.filter(x=>x.m===f); }
+function rand(a){ return a[Math.floor(Math.random()*a.length)]; }
+function shuf(a){ return [...a].sort(()=>Math.random()-.5); }
+
+function norm(s){
+  return (s||'').toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+    .replace(/[¿¡.,;:!?()"'«»\-–]/g,' ')
+    .replace(/\s+/g,' ').trim();
+}
+function wordScore(spoken, expected){
+  const sp=norm(spoken).split(' ').filter(Boolean);
+  const ex=norm(expected).split(' ').filter(Boolean);
+  if(!sp.length||!ex.length) return 0;
+  let hit=0; const used=new Array(ex.length).fill(false);
+  for(const w of sp){
+    for(let j=0;j<ex.length;j++){
+      if(!used[j]&&(ex[j]===w||(w.length>3&&lev(ex[j],w)<=1))){hit++;used[j]=true;break;}
+    }
+  }
+  const p=hit/sp.length, r=hit/ex.length;
+  return Math.round((p*.4+r*.6)*100);
+}
+function lev(a,b){
+  if(a.length>10||b.length>10) return Math.abs(a.length-b.length);
+  const dp=Array.from({length:a.length+1},(_,i)=>Array.from({length:b.length+1},(_,j)=>i||j));
+  for(let i=1;i<=a.length;i++) for(let j=1;j<=b.length;j++)
+    dp[i][j]=a[i-1]===b[j-1]?dp[i-1][j-1]:1+Math.min(dp[i-1][j],dp[i][j-1],dp[i-1][j-1]);
+  return dp[a.length][b.length];
+}
+function barColor(p){ return p>=75?'var(--green)':p>=45?'var(--gl)':'var(--red)'; }
+
+function updateProg(){
+  const p=Math.round(memorized.length/V.length*100);
+  document.getElementById('progFill').style.width=p+'%';
+  document.getElementById('progLbl').textContent=`${memorized.length} / ${V.length} memorizados`;
+}
+
+// ═════════════════ SPEECH ═════════════════
+function initSpeech(){
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SR){hasVoice=false;return;}
+  hasVoice=true;
+  recog=new SR();
+  recog.lang='es-MX';
+  recog.continuous=false;
+  recog.interimResults=true;
+  recog.maxAlternatives=3;
+}
+function startRec(onFinal,onInterim){
+  if(!recog) return;
+  isRec=true;
+  recog.onresult=(e)=>{
+    let fin='',int='';
+    for(let i=e.resultIndex;i<e.results.length;i++){
+      const t=e.results[i][0].transcript;
+      if(e.results[i].isFinal) fin+=t; else int+=t;
+    }
+    if(onInterim) onInterim(fin||int);
+    if(fin) onFinal(fin);
+  };
+  recog.onerror=(e)=>{ stopRec(); };
+  recog.onend=()=>{ isRec=false; };
+  try{ recog.start(); }catch(e){}
+}
+function stopRec(){ if(recog&&isRec){try{recog.stop();}catch(e){}} isRec=false; }
+
+// ═════════════════ MODE SWITCH ═════════════════
+function setMode(m,el){
+  mode=m; stopRec(); clearTimer();
+  ['estudio','practica','quiz','concurso'].forEach(x=>document.getElementById('m-'+x).classList.toggle('hidden',x!==m));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  if(m==='estudio') renderEstudio();
+  if(m==='practica') initPractica();
+  if(m==='quiz') initQuiz();
+  if(m==='concurso') initConcurso();
+}
+
+// ═══════════════════════════════════════════════════
+// ██████████████████  ESTUDIO  ██████████████████████
+// ═══════════════════════════════════════════════════
+function eMF(f,el){ eFilter=f; document.querySelectorAll('#m-estudio .mb').forEach(b=>b.classList.remove('active')); el.classList.add('active'); renderEstudio(); }
+function renderEstudio(){
+  const data=pool(eFilter), g=document.getElementById('eGrid');
+  const hdr=document.getElementById('eHdr');
+  hdr.textContent=eFilter==='all'?'Todos los versículos':eFilter.charAt(0)+eFilter.slice(1).toLowerCase();
+  g.innerHTML='';
+  data.forEach(v=>{
+    const idx=V.indexOf(v), mem=memorized.includes(idx);
+    const c=document.createElement('div');
+    c.className='vc'+(mem?' mem':'');
+    c.dataset.i=idx;
+    c.innerHTML=`<div class="vc-top"><div style="flex:1"><div class="vc-date">${v.d} · ${v.m}</div><div class="vc-title">${v.t}</div></div><div class="vc-check">${mem?'✓':'○'}</div></div><div class="vc-verse">${v.v}</div><div class="vc-ref">— ${v.r}</div><button class="mark-btn" onclick="toggleMem(${idx},event)">${mem?'Quitar marca':'Marcar memorizado'}</button>`;
+    c.addEventListener('click',e=>{ if(e.target.tagName==='BUTTON') return; c.classList.toggle('expanded'); });
+    g.appendChild(c);
+  });
+}
+function toggleMem(idx,e){ e.stopPropagation(); memorized.includes(idx)?memorized=memorized.filter(i=>i!==idx):memorized.push(idx); localStorage.setItem('mem',JSON.stringify(memorized)); updateProg(); renderEstudio(); }
+
+// ═══════════════════════════════════════════════════
+// ██████████████████  PRÁCTICA  █████████████████████
+// ═══════════════════════════════════════════════════
+function pMF(f,el){ pFilter=f; document.querySelectorAll('#m-practica .mb').forEach(b=>b.classList.remove('active')); el.classList.add('active'); initPractica(); }
+function initPractica(){ pPool=shuf(pool(pFilter)); pIdx=0; showPVerse(); if(!hasVoice) document.getElementById('noVoiceBanner').classList.remove('hidden'); }
+function shuffleP(){ pPool=shuf(pPool); pIdx=0; showPVerse(); }
+function nextP(){ pIdx=(pIdx+1)%pPool.length; showPVerse(); }
+function prevP(){ pIdx=(pIdx-1+pPool.length)%pPool.length; showPVerse(); }
+
+function showPVerse(){
+  stopRec(); clearTimer();
+  const v=pPool[pIdx];
+  document.getElementById('pMeta').textContent=`Versículo ${pIdx+1} de ${pPool.length} · ${v.m}`;
+  document.getElementById('pClue').textContent=v.d;
+  document.getElementById('pTrans').style.display='none';
+  document.getElementById('pTrans').textContent='';
+  const rp=document.getElementById('pResult'); rp.className='res-panel'; rp.innerHTML=''; rp.style.display='none';
+  const rb=document.getElementById('recBtn'); rb.classList.remove('rec'); rb.textContent='🎤';
+  document.getElementById('recStat').textContent='Toca para grabar';
+}
+
+function toggleRec(){
+  if(!hasVoice){ alert('Necesitas Chrome o Edge para reconocimiento de voz.'); return; }
+  if(isRec){ stopRec(); document.getElementById('recBtn').classList.remove('rec'); document.getElementById('recBtn').textContent='🎤'; document.getElementById('recStat').textContent='Toca para grabar'; return; }
+  // reset
+  document.getElementById('pTrans').style.display='none';
+  document.getElementById('pTrans').textContent='';
+  const rp=document.getElementById('pResult'); rp.className='res-panel'; rp.innerHTML=''; rp.style.display='none';
+  document.getElementById('recBtn').classList.add('rec');
+  document.getElementById('recBtn').textContent='⏹';
+  document.getElementById('recStat').textContent='Grabando... habla ahora';
+
+  startRec(
+    (final)=>{ // on final
+      stopRec();
+      document.getElementById('recBtn').classList.remove('rec');
+      document.getElementById('recBtn').textContent='🎤';
+      document.getElementById('recStat').textContent='Toca para grabar';
+      evalPractica(final);
+    },
+    (interim)=>{ // on interim
+      const t=document.getElementById('pTrans');
+      t.style.display='block'; t.textContent=interim;
+    }
+  );
+}
+
+function evalPractica(spoken){
+  const v=pPool[pIdx];
+  const sT=wordScore(spoken, v.t);
+  const sV=wordScore(spoken, v.v);
+  const sR=wordScore(spoken, v.r);
+  const overall=Math.round(sT*.25+sV*.55+sR*.2);
+
+  pStats.t++; if(overall>=65) pStats.c++; pStats.scores.push(overall);
+  const avg=pStats.scores.length?Math.round(pStats.scores.reduce((a,b)=>a+b,0)/pStats.scores.length):0;
+  document.getElementById('pStat').textContent=pStats.t;
+  document.getElementById('pCorr').textContent=pStats.c;
+  document.getElementById('pAvg').textContent=avg+'%';
+
+  if(overall>=65 && !memorized.includes(V.indexOf(v))){ memorized.push(V.indexOf(v)); localStorage.setItem('mem',JSON.stringify(memorized)); updateProg(); }
+
+  const rp=document.getElementById('pResult');
+  const lvl=overall>=80?'res-correct':overall>=50?'res-partial':'res-wrong';
+  const msg=overall>=80?'¡Excelente recitación!':overall>=50?'Buen intento, sigue practicando':'Sigue estudiando, ¡tú puedes!';
+
+  rp.className=`res-panel show ${lvl}`;
+  rp.style.display='block';
+  rp.innerHTML=`
+    <div class="res-score">${overall}%</div>
+    <div style="font-size:.82rem;color:var(--muted);margin-bottom:.7rem">${msg}</div>
+    <div class="res-breakdown">
+      ${mkBar('Título',sT)}
+      ${mkBar('Versículo',sV)}
+      ${mkBar('Cita',sR)}
+    </div>
+    <div class="correct-verse-box">
+      <div class="cv-row"><span class="cv-lbl">Título</span><span class="cv-val">${v.t}</span></div>
+      <div class="cv-row"><span class="cv-lbl">Versículo</span><span class="cv-val gold">${v.v}</span></div>
+      <div class="cv-row"><span class="cv-lbl">Cita</span><span class="cv-val">${v.r}</span></div>
+    </div>`;
+}
+
+function mkBar(label,pct){
+  return `<div class="rb-row">
+    <span class="rb-label">${label}</span>
+    <div class="rb-bar-wrap"><div class="rb-bar" style="width:${pct}%;background:${barColor(pct)}"></div></div>
+    <span class="rb-pct" style="color:${barColor(pct)}">${pct}%</span>
+  </div>`;
+}
+
+function revealP(){
+  const v=pPool[pIdx];
+  const rp=document.getElementById('pResult');
+  rp.className='res-panel show res-partial'; rp.style.display='block';
+  rp.innerHTML=`<div class="res-score" style="font-size:1rem;color:var(--muted)">Versículo revelado</div>
+    <div class="correct-verse-box">
+      <div class="cv-row"><span class="cv-lbl">Fecha</span><span class="cv-val">${v.d}</span></div>
+      <div class="cv-row"><span class="cv-lbl">Título</span><span class="cv-val">${v.t}</span></div>
+      <div class="cv-row"><span class="cv-lbl">Versículo</span><span class="cv-val gold">${v.v}</span></div>
+      <div class="cv-row"><span class="cv-lbl">Cita</span><span class="cv-val">${v.r}</span></div>
+    </div>`;
+}
+
+// ═══════════════════════════════════════════════════
+// ████████████████████  QUIZ  ███████████████████████
+// ═══════════════════════════════════════════════════
+const FIELDS=['fecha','titulo','versiculo','cita'];
+const FLBL={fecha:'Fecha',titulo:'Título',versiculo:'Versículo',cita:'Cita bíblica'};
+
+function qMF(f,el){ qFilter=f; document.querySelectorAll('#m-quiz .mb').forEach(b=>b.classList.remove('active')); el.classList.add('active'); qPool=shuf(pool(qFilter)); renderQuiz(); }
+function initQuiz(){ qPool=shuf(pool(qFilter)); qStats={c:0,t:0,s:0}; renderQuiz(); }
+
+function gField(v,f){ return f==='fecha'?v.d:f==='titulo'?v.t:f==='versiculo'?v.v:v.r; }
+
+function genQuestion(){
+  const verse=rand(qPool);
+  const cf=rand(FIELDS);
+  const af=rand(FIELDS.filter(f=>f!==cf));
+  const types=['mc','tf','fb','match'];
+  const qt=qPool.length>=4?rand(types):rand(types.filter(t=>t!=='match'));
+  if(qt==='mc') return genMC(verse,cf,af);
+  if(qt==='tf') return genTF(verse,cf,af);
+  if(qt==='fb') return genFB(verse,cf,af);
+  return genMatch(cf,af);
+}
+function genMC(verse,cf,af){
+  const correct=gField(verse,af);
+  const wrongs=[...new Set(shuf(qPool.filter(x=>x!==verse)).slice(0,5).map(x=>gField(x,af)).filter(w=>w!==correct))].slice(0,3);
+  while(wrongs.length<3) wrongs.push('—');
+  return {type:'mc',cf,af,verse,correct,options:shuf([correct,...wrongs.slice(0,3)])};
+}
+function genTF(verse,cf,af){
+  const isTrue=Math.random()>.45;
+  const shownVal=isTrue?gField(verse,af):gField(rand(qPool.filter(x=>x!==verse)),af);
+  return {type:'tf',cf,af,verse,isTrue,shownVal};
+}
+function genFB(verse,cf,af){
+  const txt=gField(verse,af);
+  const words=txt.split(' ');
+  const cands=words.map((w,i)=>({w:w.replace(/[¿¡.,;:!?()"']/g,''),i})).filter(({w,i})=>w.length>3&&i>0&&i<words.length-1);
+  const n=Math.min(3,Math.max(1,Math.floor(cands.length*.38)));
+  const chosen=shuf(cands).slice(0,n).sort((a,b)=>a.i-b.i);
+  const bpos=new Set(chosen.map(c=>c.i));
+  const blanks=chosen.map(c=>c.w);
+  const displayParts=words.map((w,i)=>bpos.has(i)?`<span class="blank" data-bi="${chosen.findIndex(c=>c.i===i)}" onclick="selBlank(${chosen.findIndex(c=>c.i===i)})">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>`:w).join(' ');
+  const distr=shuf([...new Set(V.flatMap(x=>[...x.v.split(' '),...x.t.split(' ')]).map(w=>w.replace(/[¿¡.,;:!?()"']/g,'')).filter(w=>w.length>3&&!/^\d/.test(w)))]).filter(w=>!blanks.includes(w)).slice(0,blanks.length+1);
+  return {type:'fb',cf,af,verse,blanks,bank:shuf([...blanks,...distr]),displayParts,fillState:{sel:null,filled:{},used:{}}};
+}
+function genMatch(cf,af){
+  const items=shuf(qPool).slice(0,4);
+  return {type:'match',cf,af,items,shuffRight:shuf(items),matchState:{selLeft:null,pairs:{}}};
+}
+
+function renderQuiz(){
+  curQ=genQuestion(); qAnswered=false;
+  const a=document.getElementById('qArea');
+  a.innerHTML='';
+  const card=document.createElement('div'); card.className='q-card';
+  const bdg={mc:'qb-mc',tf:'qb-tf',fb:'qb-fb',match:'qb-mc2'};
+  const bnm={mc:'Opción múltiple',tf:'Falso o verdadero',fb:'Completar',match:'Relacionar columnas'};
+  let inner=`<span class="q-badge ${bdg[curQ.type]}">${bnm[curQ.type]}</span>`;
+  if(curQ.type!=='match'){
+    inner+=`<div class="clue-lbl">Se te muestra: ${FLBL[curQ.cf]}</div>
+    <div class="clue-val">${gField(curQ.verse,curQ.cf)}</div>
+    <div class="q-ask">¿Cuál es la <strong>${FLBL[curQ.af]}</strong>?</div>`;
+  } else {
+    inner+=`<div class="q-ask">Relaciona cada <strong>${FLBL[curQ.cf]}</strong> con su <strong>${FLBL[curQ.af]}</strong></div>`;
+  }
+  if(curQ.type==='mc') inner+=renderMC();
+  if(curQ.type==='tf') inner+=renderTF();
+  if(curQ.type==='fb') inner+=renderFB();
+  if(curQ.type==='match') inner+=renderMatch();
+  card.innerHTML=inner;
+  a.appendChild(card);
+  // result container
+  const res=document.createElement('div'); res.id='qRes'; res.className='q-res'; a.appendChild(res);
+  // action row
+  const ar=document.createElement('div'); ar.id='qAR'; ar.className='ctrl-row'; ar.style.marginTop='.5rem';
+  if(curQ.type==='fb'||curQ.type==='match') ar.innerHTML=`<button class="btn-g" style="border-color:var(--gold);color:var(--gl)" onclick="checkQ()">Verificar</button><button class="btn-g" onclick="skipQ()">Saltar</button>`;
+  else ar.innerHTML=`<button class="btn-g" onclick="skipQ()">Saltar</button>`;
+  a.appendChild(ar);
+  updateQStats();
+}
+function renderMC(){
+  return `<div class="mc-opts">${curQ.options.map((o,i)=>`<button class="mc-opt" onclick="pickMC(${i})">${o}</button>`).join('')}</div>`;
+}
+function renderTF(){
+  return `<div class="clue-lbl" style="margin-top:-.2rem">¿La ${FLBL[curQ.af]} correspondiente es?</div>
+  <div class="clue-val" style="margin-bottom:.8rem;font-style:italic">${curQ.shownVal}</div>
+  <div class="tf-row">
+    <button class="tf-btn tf-t" onclick="pickTF(true)"><span class="ico">✓</span>VERDADERO</button>
+    <button class="tf-btn tf-f" onclick="pickTF(false)"><span class="ico">✗</span>FALSO</button>
+  </div>`;
+}
+function renderFB(){
+  return `<div class="fb-txt" id="fbTxt">${curQ.displayParts}</div>
+  <div class="wbank" id="wbank">${curQ.bank.map((w,i)=>`<div class="bw" id="bw${i}" onclick="pickBW(${i},'${escJ(w)}')">${w}</div>`).join('')}</div>`;
+}
+function renderMatch(){
+  const l=curQ.items.map((v,i)=>`<div class="mi" id="ml${i}" onclick="pickML(${i})">${gField(v,curQ.cf)}</div>`).join('');
+  const r=curQ.shuffRight.map((v,i)=>`<div class="mi" id="mr${i}" onclick="pickMR(${i})">${gField(v,curQ.af)}</div>`).join('');
+  return `<div class="match-grid"><div><div class="m-col-lbl">${FLBL[curQ.cf]}</div><div class="m-items">${l}</div></div><div><div class="m-col-lbl">${FLBL[curQ.af]}</div><div class="m-items">${r}</div></div></div>`;
+}
+function escJ(s){ return (s||'').replace(/'/g,"\\'"); }
+
+function pickMC(i){
+  if(qAnswered) return; qAnswered=true;
+  const chosen=curQ.options[i], ok=norm(chosen)===norm(curQ.correct);
+  document.querySelectorAll('.mc-opt').forEach((el,j)=>{
+    if(norm(curQ.options[j])===norm(curQ.correct)) el.classList.add('ok');
+    else if(j===i&&!ok) el.classList.add('fail');
+  });
+  finQ(ok);
+}
+function pickTF(userTrue){
+  if(qAnswered) return; qAnswered=true;
+  const ok=userTrue===curQ.isTrue;
+  document.querySelectorAll('.tf-btn').forEach(b=>{
+    if(b.classList.contains('tf-t')){ b.classList.add(curQ.isTrue?'ok':(!ok&&userTrue?'fail':'')); }
+    else { b.classList.add(!curQ.isTrue?'ok':(!ok&&!userTrue?'fail':'')); }
+  });
+  finQ(ok);
+}
+
+// fill blank
+let fbSel=null, fbFilled={}, fbBankUsed={};
+function selBlank(bi){
+  if(qAnswered) return;
+  document.querySelectorAll('.blank').forEach(b=>b.classList.remove('sel'));
+  if(fbSel===bi){fbSel=null;return;}
+  fbSel=bi;
+  document.querySelector(`.blank[data-bi="${bi}"]`)?.classList.add('sel');
+}
+function pickBW(bi,word){
+  if(qAnswered) return;
+  if(fbSel===null){
+    for(let i=0;i<curQ.blanks.length;i++) if(fbFilled[i]===undefined){fbSel=i;break;}
+    if(fbSel===null) return;
+  }
+  if(fbBankUsed[bi]) return;
+  const prev=fbFilled[fbSel];
+  if(prev!==undefined){fbBankUsed[prev.bi]=false; document.getElementById('bw'+prev.bi)?.classList.remove('used');}
+  fbFilled[fbSel]={word,bi};
+  fbBankUsed[bi]=true;
+  document.getElementById('bw'+bi)?.classList.add('used');
+  const bel=document.querySelector(`.blank[data-bi="${fbSel}"]`);
+  if(bel){bel.textContent=word;bel.classList.remove('sel');bel.classList.add('filled');}
+  fbSel=null;
+  for(let i=0;i<curQ.blanks.length;i++) if(fbFilled[i]===undefined){fbSel=i;const e2=document.querySelector(`.blank[data-bi="${i}"]`);if(e2)e2.classList.add('sel');break;}
+}
+function checkFB(){
+  let all=true;
+  curQ.blanks.forEach((cor,bi)=>{
+    const bel=document.querySelector(`.blank[data-bi="${bi}"]`);
+    const user=fbFilled[bi]?.word||'';
+    const ok=norm(user)===norm(cor);
+    if(!ok) all=false;
+    if(bel){bel.classList.remove('filled','sel');bel.classList.add(ok?'ok':'fail');}
+    if(!fbFilled[bi]&&bel){bel.textContent=cor;bel.classList.add('ok');}
+  });
+  return all;
+}
+
+// match
+let mSelLeft=null, mPairs={};
+const PC=['p0','p1','p2','p3'];
+function pickML(i){
+  if(qAnswered) return;
+  document.querySelectorAll('[id^=ml]').forEach(e=>e.classList.remove('active'));
+  if(mSelLeft===i){mSelLeft=null;return;}
+  mSelLeft=i;
+  document.getElementById('ml'+i)?.classList.add('active');
+}
+function pickMR(ri){
+  if(qAnswered||mSelLeft===null) return;
+  const li=mSelLeft;
+  for(const k in mPairs){if(mPairs[k].ri===ri||+k===li) delete mPairs[k];}
+  mPairs[li]={ri};
+  // recolor
+  document.querySelectorAll('[id^=ml],[id^=mr]').forEach(e=>{ PC.forEach(c=>e.classList.remove(c)); e.classList.remove('active'); });
+  let n=0;
+  for(const k in mPairs){ const c=PC[n%4]; document.getElementById('ml'+k)?.classList.add(c); document.getElementById('mr'+mPairs[k].ri)?.classList.add(c); n++; }
+  mSelLeft=null;
+}
+function checkMatch(){
+  let all=true;
+  for(const k in mPairs){
+    const li=+k, ri=mPairs[k].ri;
+    const ok=curQ.items[li]===curQ.shuffRight[ri];
+    if(!ok) all=false;
+    document.getElementById('ml'+li)?.classList.add(ok?'mc-ok':'mc-fail');
+    document.getElementById('mr'+ri)?.classList.add(ok?'mc-ok':'mc-fail');
+    if(!ok){ const ci=curQ.shuffRight.indexOf(curQ.items[li]); document.getElementById('mr'+ci)?.classList.add('mc-ok'); }
+  }
+  return all;
+}
+
+function checkQ(){
+  if(qAnswered) return;
+  qAnswered=true;
+  const ok=curQ.type==='fb'?checkFB():checkMatch();
+  finQ(ok);
+}
+function skipQ(){ fbSel=null;fbFilled={};fbBankUsed={};mSelLeft=null;mPairs={}; renderQuiz(); }
+
+function finQ(ok){
+  fbSel=null;fbFilled={};fbBankUsed={};mSelLeft=null;mPairs={};
+  qStats.t++; if(ok){qStats.c++;qStats.s++;} else qStats.s=0;
+  updateQStats();
+  const res=document.getElementById('qRes');
+  res.className=`q-res show ${ok?'ok':'fail'}`;
+  res.innerHTML=`<div class="q-res-hdr">${ok?'Correcto':'Incorrecto'}</div>
+  <div class="correct-verse-box" style="margin-top:0">
+    <div class="cv-row"><span class="cv-lbl">Fecha</span><span class="cv-val">${curQ.verse?.d||'—'}</span></div>
+    <div class="cv-row"><span class="cv-lbl">Título</span><span class="cv-val">${curQ.verse?.t||'—'}</span></div>
+    <div class="cv-row"><span class="cv-lbl">Versículo</span><span class="cv-val gold">${curQ.verse?.v||'—'}</span></div>
+    <div class="cv-row"><span class="cv-lbl">Cita</span><span class="cv-val">${curQ.verse?.r||'—'}</span></div>
+  </div>`;
+  const ar=document.getElementById('qAR');
+  ar.innerHTML=`<button class="btn-p" onclick="renderQuiz()">Siguiente →</button>`;
+}
+function updateQStats(){
+  document.getElementById('qCorr').textContent=qStats.c;
+  document.getElementById('qTot').textContent=qStats.t;
+  document.getElementById('qStrk').textContent=qStats.s;
+}
+
+// ═══════════════════════════════════════════════════
+// ██████████████████  CONCURSO  █████████████████████
+// ═══════════════════════════════════════════════════
+function cMF(f,el){ cFilter=f; document.querySelectorAll('#m-concurso .mb').forEach(b=>b.classList.remove('active')); el.classList.add('active'); initConcurso(); }
+function initConcurso(){ cPool=pool(cFilter); cState='ready'; renderCReady(); }
+
+function renderCReady(){
+  clearTimer(); stopRec();
+  document.getElementById('cStage').innerHTML=`
+    <div class="con-stage">
+      <div class="con-ready">Presiona BUZZ para comenzar<br><small style="font-size:.75rem;opacity:.6">Se te mostrará una variable aleatoria y deberás decir las otras tres</small></div>
+      <button class="buzz-btn" onclick="startCRound()">BUZZ</button>
+    </div>
+    <div class="ctrl-row" style="margin-top:0"></div>`;
+}
+
+function startCRound(){
+  cVerse=rand(cPool);
+  cClueField=rand(FIELDS);
+  cState='showing';
+  const clueVal=gField(cVerse,cClueField);
+  document.getElementById('cStage').innerHTML=`
+    <div class="con-stage" id="cStagIn">
+      <div class="timer-bar"><div class="timer-fill" id="cTF" style="width:100%;background:var(--green)"></div></div>
+      <div class="con-clue-type">${FLBL[cClueField]}</div>
+      <div class="con-clue-val">${clueVal}</div>
+      <button class="buzz-btn" id="buzzNow" onclick="buzzNow()">BUZZ !</button>
+    </div>
+    <div id="cResWrap"></div>
+    <div class="ctrl-row" id="cCtrl">
+      <button class="btn-g" onclick="skipC()">Saltar</button>
+    </div>`;
+  startTimer(30,'cTF',()=>{ if(cState==='showing') timeoutC(); });
+}
+
+function buzzNow(){
+  if(cState!=='showing') return;
+  clearTimer(); cState='recording';
+  const other=FIELDS.filter(f=>f!==cClueField).map(f=>FLBL[f]).join(', ');
+  document.getElementById('cStagIn').innerHTML=`
+    <div style="font-size:.8rem;color:var(--gold);margin-bottom:.5rem;letter-spacing:.05em">¡BUZZ! — Grabando</div>
+    <div class="con-clue-type">${FLBL[cClueField]}</div>
+    <div class="con-clue-val" style="font-size:1.3rem;margin-bottom:.8rem">${gField(cVerse,cClueField)}</div>
+    <div style="font-size:.76rem;color:var(--muted);margin-bottom:.8rem">Di: ${other}</div>
+    <button class="rec-btn rec" onclick="stopCRec()">⏹</button>
+    <div class="rec-status">Grabando... recita las 3 partes</div>
+    <div class="transcript" id="cTrans" style="display:none;margin-top:.8rem;text-align:left"></div>`;
+  startTimer(25,'',()=>{ if(cState==='recording') stopCRec(); });
+  startRec(
+    (fin)=>{ clearTimer(); stopRec(); evalConcurso(fin); },
+    (int)=>{ const t=document.getElementById('cTrans'); if(t){t.style.display='block';t.textContent=int;} }
+  );
+}
+
+function stopCRec(){
+  clearTimer(); stopRec();
+  const t=document.getElementById('cTrans');
+  if(t&&t.textContent) evalConcurso(t.textContent);
+  else evalConcurso('');
+}
+
+function evalConcurso(spoken){
+  cState='result';
+  const v=cVerse, cf=cClueField;
+  const scores=FIELDS.filter(f=>f!==cf).map(f=>({f,s:wordScore(spoken,gField(v,f))}));
+  const overall=Math.round(scores.reduce((a,x)=>a+x.s,0)/scores.length);
+  const ok=overall>=60;
+  if(ok){cStats.c++;cStats.s++;} else cStats.s=0;
+  document.getElementById('cCrr').textContent=cStats.c;
+  document.getElementById('cStrk').textContent=cStats.s;
+
+  const icon=overall>=80?'🎉':overall>=55?'👍':'✗';
+  const msg=overall>=80?'¡Excelente!':overall>=55?'Casi, sigue practicando':'Necesita más práctica';
+  const lvl=overall>=80?'res-correct':overall>=55?'res-partial':'res-wrong';
+
+  document.getElementById('cStagIn').innerHTML=`
+    <div style="font-size:2rem;margin-bottom:.3rem">${icon}</div>
+    <div style="font-family:'Playfair Display',serif;font-size:1.2rem;font-weight:700;margin-bottom:.3rem">${msg}</div>
+    <div style="font-size:1.3rem;font-weight:700;color:${overall>=80?'var(--green)':overall>=55?'var(--gl)':'var(--red)'};">${overall}%</div>`;
+
+  document.getElementById('cResWrap').innerHTML=`
+    <div class="res-panel show ${lvl}" style="margin-top:.7rem">
+      <div class="res-breakdown">
+        ${scores.map(x=>`${mkBar(FLBL[x.f],x.s)}`).join('')}
+      </div>
+      <div class="correct-verse-box">
+        <div class="cv-row"><span class="cv-lbl">Fecha</span><span class="cv-val">${v.d}</span></div>
+        <div class="cv-row"><span class="cv-lbl">Título</span><span class="cv-val">${v.t}</span></div>
+        <div class="cv-row"><span class="cv-lbl">Versículo</span><span class="cv-val gold">${v.v}</span></div>
+        <div class="cv-row"><span class="cv-lbl">Cita</span><span class="cv-val">${v.r}</span></div>
+      </div>
+    </div>`;
+
+  document.getElementById('cCtrl').innerHTML=`
+    <button class="btn-p" onclick="nextCRound()">Siguiente ronda →</button>`;
+}
+
+function timeoutC(){
+  cState='result'; clearTimer();
+  const v=cVerse;
+  document.getElementById('cStagIn').innerHTML=`
+    <div style="font-size:1.5rem;color:var(--red)">⏱ Tiempo</div>`;
+  document.getElementById('cResWrap').innerHTML=`
+    <div class="res-panel show res-wrong" style="margin-top:.7rem">
+      <div class="correct-verse-box">
+        <div class="cv-row"><span class="cv-lbl">Fecha</span><span class="cv-val">${v.d}</span></div>
+        <div class="cv-row"><span class="cv-lbl">Título</span><span class="cv-val">${v.t}</span></div>
+        <div class="cv-row"><span class="cv-lbl">Versículo</span><span class="cv-val gold">${v.v}</span></div>
+        <div class="cv-row"><span class="cv-lbl">Cita</span><span class="cv-val">${v.r}</span></div>
+      </div>
+    </div>`;
+  cStats.s=0; document.getElementById('cStrk').textContent=0;
+  document.getElementById('cCtrl').innerHTML=`<button class="btn-p" onclick="nextCRound()">Siguiente ronda →</button>`;
+}
+
+function skipC(){ clearTimer(); stopRec(); cStats.s=0; document.getElementById('cStrk').textContent=0; startCRound(); }
+function nextCRound(){ cStats.rnd++; document.getElementById('cRnd').textContent=cStats.rnd; startCRound(); }
+
+// ═════════════════ TIMER ═════════════════
+function startTimer(sec,fillId,onEnd){
+  clearTimer(); timerSec=sec; timerMax=sec;
+  timerInt=setInterval(()=>{
+    timerSec--;
+    if(fillId){
+      const el=document.getElementById(fillId);
+      if(el){
+        const pct=Math.max(0,timerSec/timerMax*100);
+        el.style.width=pct+'%';
+        el.style.background=pct>50?'var(--green)':pct>25?'var(--gl)':'var(--red)';
+      }
+    }
+    if(timerSec<=0){ clearTimer(); if(onEnd) onEnd(); }
+  },1000);
+}
+function clearTimer(){ clearInterval(timerInt); timerInt=null; }
+
+// ═════════════════ INIT ═════════════════
+initSpeech();
+updateProg();
+renderEstudio();
+</script>
+</body>
+</html>
