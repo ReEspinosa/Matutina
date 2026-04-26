@@ -250,6 +250,14 @@ main{max-width:680px;margin:0 auto;padding:0 1rem 5rem;position:relative;z-index
 /* Scrollbar */
 ::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:var(--bg)}
 ::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+
+/* Sub-mode pills */
+.smpills{display:flex;justify-content:center;gap:.5rem;padding:0 1rem .9rem}
+.smp{background:var(--card);border:1.5px solid var(--border);color:var(--muted);
+  padding:.4rem 1.1rem;border-radius:30px;cursor:pointer;font-size:.8rem;
+  font-family:'DM Sans',sans-serif;font-weight:600;transition:all .2s;letter-spacing:.01em}
+.smp:hover{border-color:var(--gold);color:var(--text)}
+.smp.active{background:var(--card2);border-color:var(--gold);color:var(--gl)}
 </style>
 </head>
 <body>
@@ -264,6 +272,7 @@ main{max-width:680px;margin:0 auto;padding:0 1rem 5rem;position:relative;z-index
 
 <div class="tabs">
   <button class="tab active" onclick="setMode('estudio',this)">Estudio</button>
+  <button class="tab" onclick="setMode('seleccion',this)">Selección</button>
   <button class="tab" onclick="setMode('practica',this)">Práctica</button>
   <button class="tab" onclick="setMode('quiz',this)">Quiz</button>
   <button class="tab" onclick="setMode('concurso',this)">Concurso</button>
@@ -280,6 +289,27 @@ main{max-width:680px;margin:0 auto;padding:0 1rem 5rem;position:relative;z-index
   <main><div class="sec-hdr" id="eHdr">Todos los versículos</div><div id="eGrid"></div></main>
 </div>
 
+<!-- ── SELECCIÓN ── -->
+<div id="m-seleccion" class="hidden">
+  <div class="mf">
+    <button class="mb active" onclick="sMF('all',this)">Todos</button>
+    <button class="mb" onclick="sMF('FEBRERO',this)">Febrero</button>
+    <button class="mb" onclick="sMF('MARZO',this)">Marzo</button>
+    <button class="mb" onclick="sMF('ABRIL',this)">Abril</button>
+  </div>
+  <div class="smpills">
+    <button class="smp active" id="smp-ft" onclick="setSMP('ft',this)">Fecha → Título</button>
+    <button class="smp" id="smp-tc" onclick="setSMP('tc',this)">Título → Cita</button>
+  </div>
+  <main>
+    <div class="stats-row">
+      <div class="stat-p">Correctas: <b id="sCorr">0</b>/<b id="sTot">0</b></div>
+      <div class="stat-p">Racha: <b id="sStrk">0</b></div>
+    </div>
+    <div id="sArea"></div>
+  </main>
+</div>
+
 <!-- ── PRÁCTICA ── -->
 <div id="m-practica" class="hidden">
   <div class="mf">
@@ -289,26 +319,13 @@ main{max-width:680px;margin:0 auto;padding:0 1rem 5rem;position:relative;z-index
     <button class="mb" onclick="pMF('ABRIL',this)">Abril</button>
   </div>
   <main>
-    <div id="noVoiceBanner" class="res-panel res-wrong hidden" style="display:none;margin-bottom:.8rem">
-      Tu navegador no soporta reconocimiento de voz. Usa Chrome o Edge en Android/PC.
-    </div>
     <div class="stats-row">
       <div class="stat-p">Practicados: <b id="pStat">0</b></div>
       <div class="stat-p">Correctos: <b id="pCorr">0</b></div>
       <div class="stat-p">Promedio: <b id="pAvg">—</b></div>
     </div>
-    <div class="prac-card" id="pracCard">
-      <div class="prac-meta" id="pMeta">Versículo 1 de 89</div>
-      <div class="prac-label">Fecha</div>
-      <div class="prac-clue" id="pClue">—</div>
-      <div class="prac-instr">Di el <strong>título</strong>, el <strong>versículo</strong> y la <strong>cita bíblica</strong></div>
-      <button class="rec-btn" id="recBtn" onclick="toggleRec()">🎤</button>
-      <div class="rec-status" id="recStat">Toca para grabar</div>
-      <div class="transcript" id="pTrans"></div>
-      <div class="res-panel" id="pResult"></div>
-      <button class="reveal-link" onclick="revealP()">Ver versículo completo</button>
-    </div>
-    <div class="ctrl-row">
+    <div id="pArea"></div>
+    <div class="ctrl-row" id="pCtrl">
       <button class="btn-g" onclick="prevP()">← Anterior</button>
       <button class="btn-g" onclick="shuffleP()">Aleatorio</button>
       <button class="btn-p" onclick="nextP()">Siguiente →</button>
@@ -500,40 +517,146 @@ function initSpeech(){
   const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
   if(!SR){hasVoice=false;return;}
   hasVoice=true;
-  recog=new SR();
-  recog.lang='es-MX';
-  recog.continuous=false;
-  recog.interimResults=true;
-  recog.maxAlternatives=3;
+  // Safari/iOS: recreate recognition each time to avoid state issues
+  window._SR=SR;
 }
 function startRec(onFinal,onInterim){
-  if(!recog) return;
-  isRec=true;
-  recog.onresult=(e)=>{
-    let fin='',int='';
-    for(let i=e.resultIndex;i<e.results.length;i++){
-      const t=e.results[i][0].transcript;
-      if(e.results[i].isFinal) fin+=t; else int+=t;
-    }
-    if(onInterim) onInterim(fin||int);
-    if(fin) onFinal(fin);
-  };
-  recog.onerror=(e)=>{ stopRec(); };
-  recog.onend=()=>{ isRec=false; };
-  try{ recog.start(); }catch(e){}
+  const SR=window._SR;
+  if(!SR||!hasVoice) return;
+  try{
+    recog=new SR();
+    recog.lang='es-MX';
+    recog.continuous=false;
+    recog.interimResults=true;
+    recog.maxAlternatives=3;
+    isRec=true;
+    recog.onresult=(e)=>{
+      let fin='',int='';
+      for(let i=e.resultIndex;i<e.results.length;i++){
+        const t=e.results[i][0].transcript;
+        if(e.results[i].isFinal) fin+=t; else int+=t;
+      }
+      if(onInterim) onInterim(fin||int);
+      if(fin){ isRec=false; onFinal(fin); }
+    };
+    recog.onerror=(e)=>{ isRec=false; };
+    recog.onend=()=>{ isRec=false; };
+    recog.start();
+  }catch(e){ isRec=false; }
 }
-function stopRec(){ if(recog&&isRec){try{recog.stop();}catch(e){}} isRec=false; }
+function stopRec(){ if(recog&&isRec){try{recog.stop();}catch(e){}} isRec=false; recog=null; }
 
 // ═════════════════ MODE SWITCH ═════════════════
 function setMode(m,el){
   mode=m; stopRec(); clearTimer();
-  ['estudio','practica','quiz','concurso'].forEach(x=>document.getElementById('m-'+x).classList.toggle('hidden',x!==m));
+  ['estudio','seleccion','practica','quiz','concurso'].forEach(x=>document.getElementById('m-'+x).classList.toggle('hidden',x!==m));
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
   el.classList.add('active');
   if(m==='estudio') renderEstudio();
-  if(m==='practica') initPractica();
+  if(m==='seleccion') initSeleccion();
+  if(m==='practica'){ pStep=0; pScores={}; initPractica(); }
   if(m==='quiz') initQuiz();
   if(m==='concurso') initConcurso();
+}
+
+// ═══════════════════════════════════════════════════
+// ████████████████  SELECCIÓN  ██████████████████████
+// ═══════════════════════════════════════════════════
+let sFilter='all', sSubMode='ft', sStats={c:0,t:0,s:0}, sCurQ=null, sAnswered=false;
+
+function sMF(f,el){ sFilter=f; document.querySelectorAll('#m-seleccion .mb').forEach(b=>b.classList.remove('active')); el.classList.add('active'); initSeleccion(); }
+function setSMP(sm,el){ sSubMode=sm; document.querySelectorAll('.smp').forEach(b=>b.classList.remove('active')); el.classList.add('active'); sStats={c:0,t:0,s:0}; updateSStats(); initSeleccion(); }
+function initSeleccion(){ sStats={c:0,t:0,s:0}; updateSStats(); renderSQ(); }
+
+function genSimilarRefs(ref, p, n=3){
+  const m=ref.match(/^(.+?)\s+(\d+):(\d+)/);
+  const vars=[];
+  if(m){
+    const [,book,ch,vs]=[...m];
+    const c=parseInt(ch),v=parseInt(vs);
+    // swap ch and verse
+    if(ch!==vs) vars.push(`${book} ${vs}:${ch}`);
+    // tweak numbers
+    vars.push(`${book} ${c+1}:${vs}`);
+    if(c>1) vars.push(`${book} ${c-1}:${vs}`);
+    vars.push(`${book} ${ch}:${v+1}`);
+    if(v>1) vars.push(`${book} ${ch}:${v-1}`);
+    // combine digits
+    vars.push(`${book} ${ch}${vs}:${vs}`);
+    vars.push(`${book} ${ch}:${ch}${vs}`);
+  }
+  // dedupe, remove original, take up to n
+  const uniq=[...new Set(vars)].filter(r=>norm(r)!==norm(ref));
+  const result=shuf(uniq).slice(0,n);
+  // fill remainder from pool refs
+  const poolRefs=shuf(p.map(x=>x.r).filter(r=>norm(r)!==norm(ref)&&!result.some(rr=>norm(rr)===norm(r))));
+  while(result.length<n) result.push(poolRefs.shift()||'—');
+  return result.slice(0,n);
+}
+
+function genSQ(){
+  const p=pool(sFilter);
+  const verse=rand(p);
+  if(sSubMode==='ft'){
+    // Show date → pick title
+    const correct=verse.t;
+    const wrongs=[...new Set(shuf(p.filter(x=>x!==verse)).map(x=>x.t).filter(w=>w!==correct))].slice(0,3);
+    while(wrongs.length<3) wrongs.push('—');
+    return {verse,clueLabel:'Fecha',clueVal:verse.d,askLabel:'Título',correct,options:shuf([correct,...wrongs.slice(0,3)])};
+  } else {
+    // Show title → pick cita (with similar-looking distractors)
+    const correct=verse.r;
+    const wrongs=genSimilarRefs(correct,p,3);
+    return {verse,clueLabel:'Título',clueVal:verse.t,askLabel:'Cita bíblica',correct,options:shuf([correct,...wrongs])};
+  }
+}
+
+function renderSQ(){
+  sCurQ=genSQ(); sAnswered=false;
+  const a=document.getElementById('sArea');
+  a.innerHTML='';
+
+  const card=document.createElement('div'); card.className='q-card';
+  card.innerHTML=`
+    <div class="clue-lbl">Se te muestra: ${sCurQ.clueLabel}</div>
+    <div class="clue-val">${sCurQ.clueVal}</div>
+    <div class="q-ask">¿Cuál es el/la <strong>${sCurQ.askLabel}</strong>?</div>
+    <div class="mc-opts" id="sMCOpts">
+      ${sCurQ.options.map((o,i)=>`<button class="mc-opt" id="sopt${i}" onclick="pickSMC(${i})">${o}</button>`).join('')}
+    </div>`;
+  a.appendChild(card);
+
+  const res=document.createElement('div'); res.id='sRes'; res.className='q-res'; a.appendChild(res);
+
+  const ar=document.createElement('div'); ar.id='sAR'; ar.className='ctrl-row'; ar.style.marginTop='.5rem';
+  ar.innerHTML=`<button class="btn-g" onclick="renderSQ()">Saltar</button>`;
+  a.appendChild(ar);
+}
+
+function pickSMC(i){
+  if(sAnswered) return; sAnswered=true;
+  const chosen=sCurQ.options[i], ok=norm(chosen)===norm(sCurQ.correct);
+  document.querySelectorAll('#sMCOpts .mc-opt').forEach((el,j)=>{
+    if(norm(sCurQ.options[j])===norm(sCurQ.correct)) el.classList.add('ok');
+    else if(j===i&&!ok) el.classList.add('fail');
+  });
+  sStats.t++; if(ok){sStats.c++;sStats.s++;} else sStats.s=0;
+  updateSStats();
+  const res=document.getElementById('sRes');
+  res.className=`q-res show ${ok?'ok':'fail'}`;
+  res.innerHTML=`<div class="q-res-hdr">${ok?'Correcto':'Incorrecto'}</div>
+    <div class="correct-verse-box" style="margin-top:0">
+      <div class="cv-row"><span class="cv-lbl">Fecha</span><span class="cv-val">${sCurQ.verse.d}</span></div>
+      <div class="cv-row"><span class="cv-lbl">Título</span><span class="cv-val">${sCurQ.verse.t}</span></div>
+      <div class="cv-row"><span class="cv-lbl">Versículo</span><span class="cv-val gold">${sCurQ.verse.v}</span></div>
+      <div class="cv-row"><span class="cv-lbl">Cita</span><span class="cv-val">${sCurQ.verse.r}</span></div>
+    </div>`;
+  document.getElementById('sAR').innerHTML=`<button class="btn-p" onclick="renderSQ()">Siguiente →</button>`;
+}
+function updateSStats(){
+  document.getElementById('sCorr').textContent=sStats.c;
+  document.getElementById('sTot').textContent=sStats.t;
+  document.getElementById('sStrk').textContent=sStats.s;
 }
 
 // ═══════════════════════════════════════════════════
@@ -560,83 +683,182 @@ function toggleMem(idx,e){ e.stopPropagation(); memorized.includes(idx)?memorize
 // ═══════════════════════════════════════════════════
 // ██████████████████  PRÁCTICA  █████████████████████
 // ═══════════════════════════════════════════════════
-function pMF(f,el){ pFilter=f; document.querySelectorAll('#m-practica .mb').forEach(b=>b.classList.remove('active')); el.classList.add('active'); initPractica(); }
-function initPractica(){ pPool=shuf(pool(pFilter)); pIdx=0; showPVerse(); if(!hasVoice) document.getElementById('noVoiceBanner').classList.remove('hidden'); }
-function shuffleP(){ pPool=shuf(pPool); pIdx=0; showPVerse(); }
-function nextP(){ pIdx=(pIdx+1)%pPool.length; showPVerse(); }
-function prevP(){ pIdx=(pIdx-1+pPool.length)%pPool.length; showPVerse(); }
+// Steps: 0=intro card, 1=titulo, 2=versiculo, 3=cita, 4=summary
+const PSTEPS=[
+  {key:'titulo', label:'Título', field:'t', weight:.25},
+  {key:'versiculo', label:'Versículo', field:'v', weight:.55},
+  {key:'cita', label:'Cita bíblica', field:'r', weight:.20},
+];
+let pStep=0, pScores={};
 
-function showPVerse(){
+function pMF(f,el){ pFilter=f; document.querySelectorAll('#m-practica .mb').forEach(b=>b.classList.remove('active')); el.classList.add('active'); initPractica(); }
+function initPractica(){ pPool=shuf(pool(pFilter)); pIdx=0; pStep=0; pScores={}; renderPractica(); }
+function shuffleP(){ pPool=shuf(pPool); pIdx=0; pStep=0; pScores={}; renderPractica(); }
+function nextP(){ pIdx=(pIdx+1)%pPool.length; pStep=0; pScores={}; renderPractica(); }
+function prevP(){ pIdx=(pIdx-1+pPool.length)%pPool.length; pStep=0; pScores={}; renderPractica(); }
+
+function renderPractica(){
   stopRec(); clearTimer();
   const v=pPool[pIdx];
-  document.getElementById('pMeta').textContent=`Versículo ${pIdx+1} de ${pPool.length} · ${v.m}`;
-  document.getElementById('pClue').textContent=v.d;
-  document.getElementById('pTrans').style.display='none';
-  document.getElementById('pTrans').textContent='';
-  const rp=document.getElementById('pResult'); rp.className='res-panel'; rp.innerHTML=''; rp.style.display='none';
-  const rb=document.getElementById('recBtn'); rb.classList.remove('rec'); rb.textContent='🎤';
-  document.getElementById('recStat').textContent='Toca para grabar';
+  const a=document.getElementById('pArea');
+  if(pStep===0) renderPIntro(v,a);
+  else if(pStep<=3) renderPStep(v,a,pStep-1);
+  else renderPSummary(v,a);
 }
 
-function toggleRec(){
-  if(!hasVoice){ alert('Necesitas Chrome o Edge para reconocimiento de voz.'); return; }
-  if(isRec){ stopRec(); document.getElementById('recBtn').classList.remove('rec'); document.getElementById('recBtn').textContent='🎤'; document.getElementById('recStat').textContent='Toca para grabar'; return; }
-  // reset
-  document.getElementById('pTrans').style.display='none';
-  document.getElementById('pTrans').textContent='';
-  const rp=document.getElementById('pResult'); rp.className='res-panel'; rp.innerHTML=''; rp.style.display='none';
-  document.getElementById('recBtn').classList.add('rec');
-  document.getElementById('recBtn').textContent='⏹';
-  document.getElementById('recStat').textContent='Grabando... habla ahora';
+function renderPIntro(v,a){
+  a.innerHTML=`
+    <div class="prac-card">
+      <div class="prac-meta">Versículo ${pIdx+1} de ${pPool.length} · ${v.m}</div>
+      <div class="prac-label">Fecha</div>
+      <div class="prac-clue">${v.d}</div>
+      <div class="prac-instr">Recitarás <strong>título</strong>, <strong>versículo</strong> y <strong>cita</strong> por separado.<br>1 minuto por cada parte.</div>
+      <div style="display:flex;gap:.8rem;justify-content:center;flex-wrap:wrap;margin-top:1rem">
+        ${PSTEPS.map((s,i)=>`<div style="background:var(--card2);border:1px solid var(--border);border-radius:20px;padding:.3rem .8rem;font-size:.75rem;color:var(--muted)">${i+1}. ${s.label}</div>`).join('')}
+      </div>
+      <div style="margin-top:1.5rem">
+        <button class="btn-p" onclick="pStep=1;renderPractica()">Comenzar →</button>
+      </div>
+      <button class="reveal-link" onclick="pRevealFull()" style="margin-top:.8rem">Ver versículo completo</button>
+      <div id="pRevealBox"></div>
+    </div>`;
+}
+
+function pRevealFull(){
+  const v=pPool[pIdx];
+  document.getElementById('pRevealBox').innerHTML=`
+    <div class="correct-verse-box" style="margin-top:.8rem;text-align:left">
+      <div class="cv-row"><span class="cv-lbl">Título</span><span class="cv-val">${v.t}</span></div>
+      <div class="cv-row"><span class="cv-lbl">Versículo</span><span class="cv-val gold">${v.v}</span></div>
+      <div class="cv-row"><span class="cv-lbl">Cita</span><span class="cv-val">${v.r}</span></div>
+    </div>`;
+}
+
+function renderPStep(v,a,stepIdx){
+  const step=PSTEPS[stepIdx];
+  const correct=v[step.field];
+  const stepNum=stepIdx+1;
+  const timerBarId=`pTimerBar${stepNum}`;
+  const transId=`pTrans${stepNum}`;
+  const recId=`pRecBtn${stepNum}`;
+  const recStatId=`pRecStat${stepNum}`;
+  const resultId=`pStepResult${stepNum}`;
+
+  a.innerHTML=`
+    <div class="prac-card">
+      <div class="prac-meta">Paso ${stepNum} de 3 · ${v.d} · ${v.m}</div>
+      <div style="margin-bottom:.6rem">
+        <div class="prac-label">Se te da: Fecha</div>
+        <div class="prac-clue" style="font-size:1.8rem">${v.d}</div>
+      </div>
+      <div class="timer-bar" style="margin-bottom:1rem"><div class="timer-fill" id="${timerBarId}" style="width:100%;background:var(--green)"></div></div>
+      <div style="font-size:.72rem;text-transform:uppercase;letter-spacing:.1em;color:var(--gold);margin-bottom:.3rem">Di el/la ${step.label}:</div>
+      <button class="rec-btn" id="${recId}" onclick="togglePStepRec(${stepIdx},'${correct.replace(/'/g,"\\'")}','${transId}','${recId}','${recStatId}','${resultId}','${timerBarId}')">🎤</button>
+      <div class="rec-status" id="${recStatId}">Toca para grabar · 1 min</div>
+      <div class="transcript" id="${transId}"></div>
+      <div class="res-panel" id="${resultId}"></div>
+      <button class="reveal-link" onclick="document.getElementById('${resultId}').className='res-panel show res-partial';document.getElementById('${resultId}').innerHTML='<div class=\\"correct-verse-box\\" style=\\"margin-top:0\\"><div class=\\"cv-row\\"><span class=\\"cv-lbl\\">${step.label}</span><span class=\\"cv-val gold\\">${correct.replace(/"/g,'&quot;')}</span></div></div>'">Ver respuesta</button>
+    </div>
+    <div class="ctrl-row" id="pStepCtrl${stepNum}">
+      <button class="btn-g" onclick="skipPStep(${stepIdx})">Saltar este paso</button>
+    </div>`;
+
+  // auto-start 60s timer
+  startTimer(60,timerBarId,()=>{ skipPStep(stepIdx); });
+}
+
+function togglePStepRec(stepIdx,correct,transId,recId,recStatId,resultId,timerBarId){
+  if(!hasVoice){
+    document.getElementById(recStatId).textContent='Sin soporte de voz. Usa Chrome/Safari.';
+    return;
+  }
+  if(isRec){
+    stopRec();
+    document.getElementById(recId).classList.remove('rec');
+    document.getElementById(recId).textContent='🎤';
+    document.getElementById(recStatId).textContent='Toca para grabar · 1 min';
+    return;
+  }
+  clearTimer();
+  document.getElementById(recId).classList.add('rec');
+  document.getElementById(recId).textContent='⏹';
+  document.getElementById(recStatId).textContent='Grabando...';
 
   startRec(
-    (final)=>{ // on final
-      stopRec();
-      document.getElementById('recBtn').classList.remove('rec');
-      document.getElementById('recBtn').textContent='🎤';
-      document.getElementById('recStat').textContent='Toca para grabar';
-      evalPractica(final);
+    (fin)=>{
+      stopRec(); clearTimer();
+      document.getElementById(recId).classList.remove('rec');
+      document.getElementById(recId).textContent='🎤';
+      document.getElementById(recStatId).textContent='Listo';
+      evalPStep(stepIdx, fin, correct, transId, resultId, `pStepCtrl${stepIdx+1}`);
     },
-    (interim)=>{ // on interim
-      const t=document.getElementById('pTrans');
-      t.style.display='block'; t.textContent=interim;
+    (int)=>{
+      const t=document.getElementById(transId);
+      if(t){t.style.display='block';t.textContent=int;}
     }
   );
 }
 
-function evalPractica(spoken){
-  const v=pPool[pIdx];
-  const sT=wordScore(spoken, v.t);
-  const sV=wordScore(spoken, v.v);
-  const sR=wordScore(spoken, v.r);
-  const overall=Math.round(sT*.25+sV*.55+sR*.2);
+function evalPStep(stepIdx, spoken, correct, transId, resultId, ctrlId){
+  const score=wordScore(spoken,correct);
+  pScores[stepIdx]=score;
+  const lvl=score>=75?'res-correct':score>=45?'res-partial':'res-wrong';
+  const msg=score>=75?'¡Excelente!':score>=45?'Buen intento':'Sigue practicando';
+  const res=document.getElementById(resultId);
+  if(res){
+    res.className=`res-panel show ${lvl}`;
+    res.style.display='block';
+    res.innerHTML=`
+      <div class="res-score">${score}%  <span style="font-size:.9rem;font-weight:400">${msg}</span></div>
+      <div class="correct-verse-box" style="margin-top:.4rem">
+        <div class="cv-row"><span class="cv-lbl">${PSTEPS[stepIdx].label}</span><span class="cv-val gold">${correct}</span></div>
+      </div>`;
+  }
+  const ctrl=document.getElementById(ctrlId);
+  if(ctrl){
+    const isLast=stepIdx===2;
+    ctrl.innerHTML=isLast
+      ?`<button class="btn-p" onclick="pStep=4;renderPractica()">Ver resumen →</button>`
+      :`<button class="btn-p" onclick="pStep=${stepIdx+2};renderPractica()">Siguiente: ${PSTEPS[stepIdx+1].label} →</button>`;
+  }
+}
 
+function skipPStep(stepIdx){
+  clearTimer(); stopRec();
+  pScores[stepIdx]=0;
+  const isLast=stepIdx===2;
+  if(isLast){ pStep=4; renderPractica(); }
+  else { pStep=stepIdx+2; renderPractica(); }
+}
+
+function renderPSummary(v,a){
+  const s0=pScores[0]??0, s1=pScores[1]??0, s2=pScores[2]??0;
+  const overall=Math.round(s0*.25+s1*.55+s2*.20);
   pStats.t++; if(overall>=65) pStats.c++; pStats.scores.push(overall);
-  const avg=pStats.scores.length?Math.round(pStats.scores.reduce((a,b)=>a+b,0)/pStats.scores.length):0;
+  const avg=pStats.scores.length?Math.round(pStats.scores.reduce((x,y)=>x+y,0)/pStats.scores.length):0;
   document.getElementById('pStat').textContent=pStats.t;
   document.getElementById('pCorr').textContent=pStats.c;
   document.getElementById('pAvg').textContent=avg+'%';
-
   if(overall>=65 && !memorized.includes(V.indexOf(v))){ memorized.push(V.indexOf(v)); localStorage.setItem('mem',JSON.stringify(memorized)); updateProg(); }
 
-  const rp=document.getElementById('pResult');
   const lvl=overall>=80?'res-correct':overall>=50?'res-partial':'res-wrong';
-  const msg=overall>=80?'¡Excelente recitación!':overall>=50?'Buen intento, sigue practicando':'Sigue estudiando, ¡tú puedes!';
-
-  rp.className=`res-panel show ${lvl}`;
-  rp.style.display='block';
-  rp.innerHTML=`
-    <div class="res-score">${overall}%</div>
-    <div style="font-size:.82rem;color:var(--muted);margin-bottom:.7rem">${msg}</div>
-    <div class="res-breakdown">
-      ${mkBar('Título',sT)}
-      ${mkBar('Versículo',sV)}
-      ${mkBar('Cita',sR)}
-    </div>
-    <div class="correct-verse-box">
-      <div class="cv-row"><span class="cv-lbl">Título</span><span class="cv-val">${v.t}</span></div>
-      <div class="cv-row"><span class="cv-lbl">Versículo</span><span class="cv-val gold">${v.v}</span></div>
-      <div class="cv-row"><span class="cv-lbl">Cita</span><span class="cv-val">${v.r}</span></div>
+  a.innerHTML=`
+    <div class="prac-card">
+      <div class="prac-meta">Resumen · ${v.d} · ${v.m}</div>
+      <div style="font-family:'Playfair Display',serif;font-size:1.1rem;font-weight:700;margin-bottom:1rem">${v.t}</div>
+      <div class="res-panel show ${lvl}" style="margin:.3rem 0 .8rem">
+        <div class="res-score">${overall}% general</div>
+        <div class="res-breakdown" style="margin-top:.5rem">
+          ${mkBar('Título',s0)}
+          ${mkBar('Versículo',s1)}
+          ${mkBar('Cita',s2)}
+        </div>
+      </div>
+      <div class="correct-verse-box">
+        <div class="cv-row"><span class="cv-lbl">Título</span><span class="cv-val">${v.t}</span></div>
+        <div class="cv-row"><span class="cv-lbl">Versículo</span><span class="cv-val gold">${v.v}</span></div>
+        <div class="cv-row"><span class="cv-lbl">Cita</span><span class="cv-val">${v.r}</span></div>
+      </div>
     </div>`;
 }
 
@@ -646,19 +868,6 @@ function mkBar(label,pct){
     <div class="rb-bar-wrap"><div class="rb-bar" style="width:${pct}%;background:${barColor(pct)}"></div></div>
     <span class="rb-pct" style="color:${barColor(pct)}">${pct}%</span>
   </div>`;
-}
-
-function revealP(){
-  const v=pPool[pIdx];
-  const rp=document.getElementById('pResult');
-  rp.className='res-panel show res-partial'; rp.style.display='block';
-  rp.innerHTML=`<div class="res-score" style="font-size:1rem;color:var(--muted)">Versículo revelado</div>
-    <div class="correct-verse-box">
-      <div class="cv-row"><span class="cv-lbl">Fecha</span><span class="cv-val">${v.d}</span></div>
-      <div class="cv-row"><span class="cv-lbl">Título</span><span class="cv-val">${v.t}</span></div>
-      <div class="cv-row"><span class="cv-lbl">Versículo</span><span class="cv-val gold">${v.v}</span></div>
-      <div class="cv-row"><span class="cv-lbl">Cita</span><span class="cv-val">${v.r}</span></div>
-    </div>`;
 }
 
 // ═══════════════════════════════════════════════════
@@ -775,10 +984,11 @@ function pickMC(i){
 function pickTF(userTrue){
   if(qAnswered) return; qAnswered=true;
   const ok=userTrue===curQ.isTrue;
-  document.querySelectorAll('.tf-btn').forEach(b=>{
-    if(b.classList.contains('tf-t')){ b.classList.add(curQ.isTrue?'ok':(!ok&&userTrue?'fail':'')); }
-    else { b.classList.add(!curQ.isTrue?'ok':(!ok&&!userTrue?'fail':'')); }
-  });
+  const tBtn=document.querySelector('.tf-t');
+  const fBtn=document.querySelector('.tf-f');
+  // always highlight the correct answer green
+  if(curQ.isTrue){ tBtn.classList.add('ok'); if(!ok) fBtn.classList.add('fail'); }
+  else { fBtn.classList.add('ok'); if(!ok) tBtn.classList.add('fail'); }
   finQ(ok);
 }
 
@@ -1025,6 +1235,7 @@ function clearTimer(){ clearInterval(timerInt); timerInt=null; }
 initSpeech();
 updateProg();
 renderEstudio();
+document.getElementById('pArea')&&renderPractica&&renderPractica();
 </script>
 </body>
 </html>
